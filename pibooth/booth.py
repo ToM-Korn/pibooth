@@ -85,6 +85,7 @@ class PiApplication(object):
 
         # Create window of (width, height)
         init_size = self._config.gettyped('WINDOW', 'size')
+        init_orientation = self._config.gettyped('WINDOW', 'orientation')
         init_debug = self._config.getboolean('GENERAL', 'debug')
         init_color = self._config.gettyped('WINDOW', 'background')
         init_text_color = self._config.gettyped('WINDOW', 'text_color')
@@ -96,7 +97,7 @@ class PiApplication(object):
             self._window = PiWindow(title, init_size, color=init_color,
                                     text_color=init_text_color, debug=init_debug)
         else:
-            self._window = PiWindow(title, color=init_color,
+            self._window = PiWindow(title, orientation=init_orientation, color=init_color,
                                     text_color=init_text_color, debug=init_debug)
 
         self._menu = None
@@ -448,7 +449,8 @@ def main():
     options = parser.parse_args()
 
     if not options.nolog:
-        filename = osp.join(tempfile.gettempdir(), 'pibooth.log')
+        # filename = osp.join(tempfile.gettempdir(), 'pibooth.log') # original
+        filename = osp.join(options.config_directory, 'pibooth.log') # tk edit -> log to event folder
     else:
         filename = None
     configure_logging(options.logging, '[ %(levelname)-8s] %(name)-18s: %(message)s', filename=filename)

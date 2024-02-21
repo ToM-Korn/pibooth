@@ -20,9 +20,10 @@ class BaseCamera(object):
         self.delete_internal_memory = False
         self.preview_rotation, self.capture_rotation = (0, 0)
         self.preview_iso, self.capture_iso = (100, 100)
+        self.imageformat = 'Large Normal JPEG'
         self.preview_flip, self.capture_flip = (False, False)
 
-    def initialize(self, iso, resolution, rotation=0, flip=False, delete_internal_memory=False):
+    def initialize(self, iso, resolution, rotation=0, flip=False, delete_internal_memory=False, imageformat=None):
         """Initialize the camera.
         """
         if not isinstance(rotation, (tuple, list)):
@@ -38,6 +39,8 @@ class BaseCamera(object):
         if not isinstance(iso, (tuple, list)):
             iso = (iso, iso)
         self.preview_iso, self.capture_iso = iso
+        if imageformat:
+            self.imageformat = imageformat
         self.delete_internal_memory = delete_internal_memory
         self._specific_initialization()
 

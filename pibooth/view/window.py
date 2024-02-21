@@ -39,8 +39,10 @@ class PiWindow(object):
                  text_color=(255, 255, 255),
                  arrow_location=background.ARROW_BOTTOM,
                  arrow_offset=0,
-                 debug=False):
+                 debug=False,
+                 orientation='landscape'):
         self.__size = size
+        self.orientation = orientation
         self.debug = debug
         self.bg_color = color
         self.text_color = text_color
@@ -244,9 +246,13 @@ class PiWindow(object):
         """
         self._capture_number = (0, self._capture_number[1])
         if with_print and pil_image:
-            self._update_background(background.IntroWithPrintBackground(self.arrow_location, self.arrow_offset))
+            self._update_background(background.IntroWithPrintBackground(self.arrow_location,
+                                                                        self.arrow_offset,
+                                                                        self.orientation))
         else:
-            self._update_background(background.IntroBackground(self.arrow_location, self.arrow_offset))
+            self._update_background(background.IntroBackground(self.arrow_location,
+                                                               self.arrow_offset,
+                                                               self.orientation))
 
         if pil_image:
             self._update_foreground(pil_image, self.RIGHT)

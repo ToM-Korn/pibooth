@@ -195,10 +195,11 @@ class Background(object):
 
 class IntroBackground(Background):
 
-    def __init__(self, arrow_location=ARROW_BOTTOM, arrow_offset=0):
+    def __init__(self, arrow_location=ARROW_BOTTOM, arrow_offset=0, orientation='landscape'):
         Background.__init__(self, "intro")
         self.arrow_location = arrow_location
         self.arrow_offset = arrow_offset
+        self.orientation = orientation
         self.left_arrow = None
         self.left_arrow_pos = None
 
@@ -206,12 +207,19 @@ class IntroBackground(Background):
         Background.resize(self, screen)
         if self._need_update and self.arrow_location != ARROW_HIDDEN:
             if self.arrow_location == ARROW_TOUCH:
-                size = (self._rect.width * 0.2, self._rect.height * 0.2)
+                if self.orientation == 'portrait':
+                    size = (self._rect.width * 0.5, self._rect.height * 0.5)
+                else:
+                    size = (self._rect.width * 0.2, self._rect.height * 0.2)
 
                 self.left_arrow = pictures.get_pygame_image("camera.png", size, vflip=False, color=self._text_color)
 
-                x = int(self._rect.width * 0.2)
-                y = int(self._rect.height // 2)
+                if self.orientation == 'portrait':
+                    x = int(self._rect.width * 0.25)
+                    y = int(self._rect.height * 0.6)
+                else:
+                    x = int(self._rect.width * 0.2)
+                    y = int(self._rect.height // 2)
             else:
                 size = (self._rect.width * 0.3, self._rect.height * 0.3)
 
@@ -241,10 +249,16 @@ class IntroBackground(Background):
                                self._rect.height * 0.6 - self._text_border)
             align = 'bottom-center'
         elif self.arrow_location == ARROW_TOUCH:
-            rect = pygame.Rect(self._text_border, self._text_border,
-                               self._rect.width / 2 - 2 * self._text_border,
-                               self._rect.height * 0.4 - self._text_border)
-            align = 'bottom-center'
+            if self.orientation == 'portrait':
+                rect = pygame.Rect(self._text_border, self._text_border,
+                                   self._rect.width - 2 * self._text_border,
+                                   self._rect.height * 0.4 - self._text_border)
+                align = 'center'
+            else:
+                rect = pygame.Rect(self._text_border, self._text_border,
+                                   self._rect.width / 2 - 2 * self._text_border,
+                                   self._rect.height * 0.4 - self._text_border)
+                align = 'bottom-center'
         else:
             rect = pygame.Rect(self._text_border, self._rect.height * 0.4,
                                self._rect.width / 2 - 2 * self._text_border,

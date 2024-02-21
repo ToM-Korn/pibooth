@@ -61,9 +61,13 @@ DEFAULT = odict((
     ("WINDOW",
         odict((
             ("size",
-                ((800, 480),
+                ('fullscreen',
                  "The (width, height) of the display window or 'fullscreen'",
                  'Startup size', ['(800, 480)', 'fullscreen'])),
+            ("orientation",
+             ('landscape', "This adjusts how the layout on the screen is built if the monitor or "
+                           "window is either in portrait or landscape mode. For example if you "
+                           "use a screen in portrait mode.")),
             ("background",
                 ((0, 0, 0),
                  "Background RGB color or image path",
@@ -152,6 +156,9 @@ DEFAULT = odict((
                 ("Footer 2",
                  "Secondary text displayed",
                  "Sub-title", "")),
+            ("footer_logo",
+             ('',"Path to Logo that should appear at an empty spot instead of a Picture"
+                 "The Footer Text will be set below the Logo")),
             ("text_colors",
                 ((0, 0, 0),
                  "RGB colors used for footer texts (list of tuples accepted)",
@@ -208,6 +215,9 @@ DEFAULT = odict((
                 ("default",
                  "Name of the printer defined in CUPS (or use the 'default' one)",
                  None, None)),
+            ('format',
+             ('standard', 'Defines what format is printed.'
+                          'standard: 6x4 inch, stripe: 6x2 inch 2 pcs')),
             ("printer_options",
                 ({},
                  "Print options passed to the printer, shall be a valid Python dictionary",

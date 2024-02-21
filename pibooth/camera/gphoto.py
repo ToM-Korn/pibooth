@@ -229,6 +229,7 @@ class GpCamera(BaseCamera):
         if timeout < 1:
             raise ValueError("Start time shall be greater than 0")
 
+        # this action is performed on canon dslr to focus during the countdown
         self.set_config_value('actions', 'autofocusdrive', '1')
 
         shown = False
