@@ -180,6 +180,10 @@ DEFAULT = odict((
                 (100,
                  "Adjust ISO for lighting issues, can be different for preview and capture (list of integers accepted)",
                  None, None)),
+            ("imageformat",
+             ("'Large Normal JPEG'",
+              "Capture Size of Image by Camera according to EOS Settings. This is mainly to speed up Download from Camera"
+              "and upload to Cloud Storage if used.", None, None)),
             ("flip",
                 (False,
                  "Flip horizontally the capture",

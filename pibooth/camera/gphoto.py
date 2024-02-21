@@ -102,6 +102,8 @@ class GpCamera(BaseCamera):
 
         self.set_config_value('imgsettings', 'iso', self.preview_iso)
         self.set_config_value('settings', 'capturetarget', 'Memory card')
+        self.set_config_value('imgsettings', 'imageformat', self.imageformat)
+        self.set_config_value('imgsettings', 'imageformatsd', self.imageformat)
 
     def _show_overlay(self, text, alpha):
         """Add an image as an overlay.
@@ -227,6 +229,8 @@ class GpCamera(BaseCamera):
         if timeout < 1:
             raise ValueError("Start time shall be greater than 0")
 
+        self.set_config_value('actions', 'autofocusdrive', '1')
+
         shown = False
         first_loop = True
         timer = PoolingTimer(timeout)
@@ -252,6 +256,8 @@ class GpCamera(BaseCamera):
             pygame.event.pump()
             if updated_rect:
                 pygame.display.update(updated_rect)
+
+        self.set_config_value('actions', 'cancelautofocus', '1')
 
         self._show_overlay(get_translated_text('smile'), alpha)
         self._window.show_image(self._get_preview_image())
@@ -292,14 +298,14 @@ class GpCamera(BaseCamera):
         if effect not in self.IMAGE_EFFECTS:
             raise ValueError("Invalid capture effect '{}' (choose among {})".format(effect, self.IMAGE_EFFECTS))
 
-        if self.capture_iso != self.preview_iso:
-            self.set_config_value('imgsettings', 'iso', self.capture_iso)
+        # if self.capture_iso != self.preview_iso:
+        #     self.set_config_value('imgsettings', 'iso', self.capture_iso)
 
         self._captures.append((self._cam.capture(gp.GP_CAPTURE_IMAGE), effect))
         time.sleep(0.3)  # Necessary to let the time for the camera to save the image
 
-        if self.capture_iso != self.preview_iso:
-            self.set_config_value('imgsettings', 'iso', self.preview_iso)
+        # if self.capture_iso != self.preview_iso:
+        #     self.set_config_value('imgsettings', 'iso', self.preview_iso)
 
         self._hide_overlay()  # If stop_preview() has not been called
 
