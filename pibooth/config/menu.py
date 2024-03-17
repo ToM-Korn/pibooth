@@ -121,6 +121,7 @@ class PiConfigMenu(object):
         """Build sub-menu"""
         length = 0
         for name, option in DEFAULT[section].items():
+            # LOGGER.info(f"menu builder {name} {option}")
             if option[2] and length < len(option[2]):
                 length = len(option[2])
         pattern = '{:.<' + str(max(length + 2, 25)) + '} '

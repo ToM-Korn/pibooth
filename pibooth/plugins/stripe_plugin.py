@@ -10,12 +10,12 @@ from pibooth.pictures import get_picture_factory
 from pibooth.pictures.pool import PicturesFactoryPool
 
 
-class PicturePlugin(object):
+class StripePlugin(object):
 
-    """Plugin to build the final picture.
+    """Plugin to build the final picture stripe.
     """
 
-    name = 'pibooth-core:picture'
+    name = 'pibooth-core:stripe'
 
     def __init__(self, plugin_manager):
         self._pm = plugin_manager
@@ -47,14 +47,28 @@ class PicturePlugin(object):
         if overlays[opt_index]:
             factory.set_overlay(overlays[opt_index])
 
+        # todo set correct path to event folder
+
+        logo = cfg.gettuple('PICTURE', 'footer_logo', 'path', 1)
         texts = [cfg.get('PICTURE', 'footer_text1').strip('"').format(**self.texts_vars),
                  cfg.get('PICTURE', 'footer_text2').strip('"').format(**self.texts_vars)]
         colors = cfg.gettuple('PICTURE', 'text_colors', 'color', len(texts))
         text_fonts = cfg.gettuple('PICTURE', 'text_fonts', str, len(texts))
         alignments = cfg.gettuple('PICTURE', 'text_alignments', str, len(texts))
+
+        # logo needs to be added before text, for sizing...
+        # but we would need to tell the logo that there is text as well
+        # todo fix text logo combi
+        if logo != '':
+            # factory.add_logo(logo, alignment)
+            # we only take the first logo found ... for now
+            factory.add_logo(logo[0])
+
+
         if any(elem != '' for elem in texts):
             for params in zip(texts, text_fonts, colors, alignments):
                 factory.add_text(*params)
+
 
         if cfg.getboolean('PICTURE', 'captures_cropping'):
             factory.set_cropping()
@@ -111,10 +125,10 @@ class PicturePlugin(object):
 
             for capture in captures:
                 count = captures.index(capture)
-                capture.save(osp.join(rawdir, "{:03}{}.jpg".format(count, cfg.gettyped('PICTURE', 'pic_postfix'))))
+                capture.save(osp.join(rawdir, "{:03}{}.jpg".format(count, cfg.get('PICTURE', 'pic_postfix').strip('"'))))
 
         LOGGER.info("Creating the final picture")
-        default_factory = get_picture_factory(captures, cfg.get('PICTURE', 'orientation'))
+        default_factory = get_picture_factory(captures, cfg.get('PICTURE', 'orientation'), paper_format=(2,6))
         factory = self._pm.hook.pibooth_setup_picture_factory(cfg=cfg,
                                                               opt_index=idx,
                                                               factory=default_factory)
@@ -128,7 +142,7 @@ class PicturePlugin(object):
             LOGGER.info("Asyncronously generate pictures for animation")
             for capture in captures:
                 default_factory = get_picture_factory((capture,), cfg.get(
-                    'PICTURE', 'orientation'), force_pil=True, dpi=200)
+                    'PICTURE', 'orientation'), paper_format=(2,6), force_pil=True, dpi=200)
                 factory = self._pm.hook.pibooth_setup_picture_factory(cfg=cfg,
                                                                       opt_index=idx,
                                                                       factory=default_factory)

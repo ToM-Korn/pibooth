@@ -31,6 +31,11 @@ class PiWindow(object):
     CENTER = 'center'
     RIGHT = 'right'
     LEFT = 'left'
+    TOP = 'top'
+    TOP_LEFT = 'top_left'
+    BOTTOM = 'bottom'
+    BOTTOM_RIGHT = 'bottom_right'
+    BOTTOM_LEFT = 'bottom_left'
     FULLSCREEN = 'fullscreen'
 
     def __init__(self, title,
@@ -72,7 +77,12 @@ class PiWindow(object):
         self._pos_map = {self.CENTER: self._center_pos,
                          self.RIGHT: self._right_pos,
                          self.LEFT: self._left_pos,
-                         self.FULLSCREEN: self._center_pos}
+                         self.TOP_LEFT: self._top_left_pos,
+                         self.FULLSCREEN: self._center_pos,
+                         self.BOTTOM: self._bottom_pos,
+                         self.BOTTOM_RIGHT: self._bottom_right_pos,
+                         self.BOTTOM_LEFT: self._bottom_left_pos,
+                         self.TOP: self._top_pos}
 
         # Don't use pygame.mouse.get_cursor() because will be removed in pygame2
         self._cursor = ((16, 16), (0, 0),
@@ -88,9 +98,16 @@ class PiWindow(object):
         image_name = id(pil_image)
 
         if pos == self.FULLSCREEN:
-            image_size_max = (self.surface.get_size()[0] * 0.9, self.surface.get_size()[1] * 0.9)
+            if self.orientation == "portrait":
+                # todo check in fullscreen portrait monitor
+                image_size_max = (self.surface.get_size()[0] * 0.9, self.surface.get_size()[1] * 0.9)
+            else:
+                image_size_max = (self.surface.get_size()[0] * 0.9, self.surface.get_size()[1] * 0.9)
         else:
-            image_size_max = (self.surface.get_size()[0] * 0.48, self.surface.get_size()[1])
+            if self.orientation == "portrait":
+                image_size_max = (self.surface.get_size()[0] * 0.48, self.surface.get_size()[1] * 0.48)
+            else:
+                image_size_max = (self.surface.get_size()[0] * 0.48, self.surface.get_size()[1] )
 
         buff_size, buff_image = self._buffered_images.get(image_name, (None, None))
         if buff_image and image_size_max == buff_size:
@@ -101,6 +118,7 @@ class PiWindow(object):
                     pil_image.size, image_size_max), Image.ANTIALIAS)
             else:
                 image = pil_image
+
             image = pygame.image.frombuffer(image.tobytes(), image.size, image.mode)
             if self._current_foreground:
                 self._buffered_images.pop(id(self._current_foreground[0]), None)
@@ -185,6 +203,14 @@ class PiWindow(object):
         pos = self.surface.get_rect().center
         return image.get_rect(center=pos) if image else pos
 
+    def _top_left_pos(self, image):
+        """
+        Return the position of the given image to be put on the bottom of the screen
+        """
+        pos = (self.surface.get_rect().centerx - self.surface.get_rect().centerx // 2,
+               self.surface.get_rect().centery - self.surface.get_rect().centery // 2)
+        return image.get_rect(center=pos) if image else pos
+
     def _left_pos(self, image):
         """
         Return the position of the given image to be put on the left of the screen
@@ -198,6 +224,38 @@ class PiWindow(object):
         """
         pos = (self.surface.get_rect().centerx + self.surface.get_rect().centerx // 2, self.surface.get_rect().centery)
         return image.get_rect(center=pos) if image else pos
+
+    def _bottom_pos(self, image):
+        """
+        Return the position of the given image to be put on the bottom of the screen
+        """
+        pos = (self.surface.get_rect().centerx, self.surface.get_rect().centery + self.surface.get_rect().centery // 2)
+        return image.get_rect(center=pos) if image else pos
+
+    def _bottom_right_pos(self, image):
+        """
+        Return the position of the given image to be put on the bottom of the screen
+        """
+        pos = (self.surface.get_rect().centerx + self.surface.get_rect().centerx // 2,
+               self.surface.get_rect().centery + self.surface.get_rect().centery // 2)
+        return image.get_rect(center=pos) if image else pos
+
+    def _bottom_left_pos(self, image):
+        """
+        Return the position of the given image to be put on the bottom of the screen
+        """
+        pos = (self.surface.get_rect().centerx - self.surface.get_rect().centerx // 2,
+               self.surface.get_rect().centery + self.surface.get_rect().centery // 2)
+        return image.get_rect(center=pos) if image else pos
+
+    def _top_pos(self, image):
+        """
+        Return the position of the given image to be put on the bottom of the screen
+        """
+        pos = (self.surface.get_rect().centerx, self.surface.get_rect().centery - self.surface.get_rect().centery // 2)
+        return image.get_rect(center=pos) if image else pos
+
+
 
     def get_rect(self, absolute=False):
         """Return a Rect object (as defined in pygame) for this window.
@@ -255,7 +313,11 @@ class PiWindow(object):
                                                                self.orientation))
 
         if pil_image:
-            self._update_foreground(pil_image, self.RIGHT)
+            if self.orientation == 'portrait':
+                self._update_foreground(pil_image, self.BOTTOM_RIGHT)
+            else:
+                self._update_foreground(pil_image, self.RIGHT)
+
         elif self._current_foreground:
             self._buffered_images.pop(id(self._current_foreground[0]), None)
             self._current_foreground = None
@@ -294,9 +356,10 @@ class PiWindow(object):
         """
         self._capture_number = (0, self._capture_number[1])
         self._update_background(background.PrintBackground(self.arrow_location,
-                                                           self.arrow_offset))
+                                                           self.arrow_offset,
+                                                           self.orientation))
         if pil_image:
-            self._update_foreground(pil_image, self.LEFT)
+            self._update_foreground(pil_image, self.TOP_LEFT)
 
     def show_finished(self, pil_image=None):
         """Show finished view (image resized fullscreen).

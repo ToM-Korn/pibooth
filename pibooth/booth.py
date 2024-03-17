@@ -94,12 +94,13 @@ class PiApplication(object):
 
         title = 'Pibooth v{}'.format(pibooth.__version__)
         if not isinstance(init_size, str):
-            self._window = PiWindow(title, init_size, color=init_color,
+            self._window = PiWindow(title, init_size, orientation=init_orientation, color=init_color,
                                     text_color=init_text_color, debug=init_debug)
         else:
             self._window = PiWindow(title, orientation=init_orientation, color=init_color,
                                     text_color=init_text_color, debug=init_debug)
 
+        self._orientation = init_orientation
         self._menu = None
         self._multipress_timer = PoolingTimer(config.getfloat('CONTROLS', 'multi_press_delay'), False)
         self._fingerdown_events = []
@@ -157,6 +158,10 @@ class PiApplication(object):
         fonts.CURRENT = fonts.get_filename(self._config.get('WINDOW', 'font'))
 
         # Set the captures choices
+        # TK: reconfigured for beeing able to manage Stripes in the first place and
+        #       a Template System later on
+        #
+        # TK: First Step is to take 3 Pictures and Create a Stripe with them
         choices = self._config.gettuple('PICTURE', 'captures', int)
         for chx in choices:
             if chx not in [1, 2, 3, 4]:
@@ -165,6 +170,7 @@ class PiApplication(object):
                 choices = self.capture_choices
                 break
         self.capture_choices = choices
+        self.pic_postfix = self._config.gettyped('PICTURE', 'pic_postfix')
 
         # Handle autostart of the application
         self._config.handle_autostart()
@@ -254,7 +260,7 @@ class PiApplication(object):
         """
         if not self.capture_date:
             raise EnvironmentError("The 'capture_date' attribute is not set yet")
-        return "{}_pibooth.jpg".format(self.capture_date)
+        return "{}{}.jpg".format(self.capture_date, self.pic_postfix)
 
     def find_quit_event(self, events):
         """Return the first found event if found in the list.
@@ -311,8 +317,15 @@ class PiApplication(object):
             if (event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3)) or event.type == pygame.FINGERUP:
                 pos = get_event_pos(self._window.display_size, event)
                 rect = self._window.get_rect()
-                if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(pos):
-                    return event
+                # if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(pos):
+                # this is true for the left side of the rectangle
+                # reconfigured to get the correct area depending on display orientation
+                if self._orientation == 'landscape':
+                    if pygame.Rect(0, 0, rect.width//2, rect.height).collidepoint(pos):
+                        return event
+                if self._orientation == 'portrait':
+                    if pygame.Rect(0, 0, rect.width, rect.height//2).collidepoint(pos):
+                        return event
             if event.type == BUTTONDOWN and event.capture:
                 return event
         return None
@@ -327,8 +340,14 @@ class PiApplication(object):
             if (event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3)) or event.type == pygame.FINGERUP:
                 pos = get_event_pos(self._window.display_size, event)
                 rect = self._window.get_rect()
-                if pygame.Rect(rect.width // 2, 0, rect.width // 2, rect.height).collidepoint(pos):
-                    return event
+                if self._orientation == 'portrait':
+                    if pygame.Rect(0, rect.height//2,
+                                   rect.width, rect.height//2).collidepoint(pos):
+                        return event
+                else:
+                    if pygame.Rect(rect.width // 2, 0,
+                                   rect.width // 2, rect.height).collidepoint(pos):
+                        return event
             if event.type == BUTTONDOWN and event.printer:
                 return event
         return None

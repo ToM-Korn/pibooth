@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
-
+import os
 import os.path as osp
+import sys
+
 from PIL import Image, ImageOps
 import pygame
 from pibooth import language
@@ -23,7 +25,10 @@ def get_filename(name):
     :return: absolute image path
     :rtype: str
     """
-    return osp.join(osp.dirname(osp.abspath(__file__)), 'assets', name)
+    if osp.isdir('./custom_images'):
+        return osp.join(osp.abspath(os.path.curdir), 'custom_images', name)
+    else:
+        return osp.join(osp.dirname(osp.abspath(__file__)), 'assets', name)
 
 
 def colorize_pil_image(pil_image, color, bg_color=None):
@@ -145,6 +150,13 @@ def get_best_orientation(captures):
     :rtype: str
     """
     is_portrait = captures[0].size[0] < captures[0].size[1]
+    # crashes if there are more than 4 captures
+    # this happens for example if the settings are changed
+    # during a capture event already was running
+    # this code at least saves the software from crashing...
+    while len(captures) > 4:
+        captures.pop(0)
+    # original code form here
     if len(captures) == 1 or len(captures) == 4:
         if is_portrait:
             orientation = PORTRAIT
@@ -189,4 +201,5 @@ def get_picture_factory(captures, orientation=AUTO, paper_format=(4, 6), force_p
     if not factory.cv2 or force_pil:
         return factory.PilPictureFactory(size[0], size[1], *captures)
 
+    # For generating image for printing this one is taken
     return factory.OpenCvPictureFactory(size[0], size[1], *captures)

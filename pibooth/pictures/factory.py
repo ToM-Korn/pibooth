@@ -56,6 +56,10 @@ class PictureFactory(object):
         self._overlay_image = None
         self._background_color = (255, 255, 255)
         self._background_image = None
+        self._logo = None
+        self._logo_height = 0
+        self._logo_width = 0
+        self._has_logo = False
 
         self.name = self.__class__.__name__
         self.width = width
@@ -76,7 +80,13 @@ class PictureFactory(object):
         image_x = self._margin
         image_y = self._margin
         total_width = self.width - 2 * self._margin
-        total_height = self.height - self._texts_height - 2 * self._margin
+        # we start here with adding a logo
+        # the logo should take half of the text space
+        # depinding on the orientation ...
+        # and depending on the logo format
+        # 1st step is to take a landscape logo and add it
+        # above the text
+        total_height = self.height - self._logo_height - self._texts_height - 2 * self._margin
 
         if len(self._images) == 1:
             image_width = total_width
@@ -84,6 +94,8 @@ class PictureFactory(object):
         elif 2 <= len(self._images) < 4:
             if self.is_portrait:
                 image_width = total_width
+                # calc hight of one image by taking full hight minus margins needed
+                # divided by images
                 image_height = (total_height - (len(self._images) - 1) * self._margin) // len(self._images)
             else:
                 image_width = (total_width - (len(self._images) - 1) * self._margin) // len(self._images)
@@ -154,6 +166,33 @@ class PictureFactory(object):
                 else:
                     text_x += interline + text_width
                     yield text_x, text_y + (total_height - text_height) // 2, text_width, text_height
+
+
+    def _logo_rect(self, interline=None):
+        """Yield top-left coordinates and max size rectangle for each text.
+
+        :param interline: margin between each text line
+        :type interline: int
+
+        :return: (text_x, text_y, text_width, text_height)
+        :rtype: tuple
+        """
+        # if not interline:
+        #     interline = 20
+
+        logo_x = self._margin_text
+        logo_y = self.height - self._logo_height - self._texts_height
+        total_width = self.width - 2 * self._margin_text
+        total_height = self._logo_height - self._margin_text
+
+        if self.is_portrait:
+            # todo this is for stripe mode
+            #  get it working for all portrait modes
+            logo_height = total_height
+            return logo_x, logo_y, total_width, total_height
+        else:
+            # todo calc this
+            return logo_x, logo_y, total_width, total_height
 
     def _image_resize_keep_ratio(self, image, max_w, max_h, crop=False):
         """Resize an image to fixed dimensions while keeping its aspect ratio.
@@ -244,6 +283,18 @@ class PictureFactory(object):
                        text_y + (max_height - text_height) // 2 - offset_y // 2),
                       text, color, font=font)
 
+
+    def _build_logo(self, image):
+        """Draw the images matrix on the given image.
+
+        :param image: image object which depends on the child class implementation.
+        :type image: object
+
+        :return: image object which depends on the child class implementation.
+        :rtype: object
+        """
+        raise NotImplementedError
+
     def _build_outlines(self, image):
         """Build rectangle around each elements. This method is only for
         debuging purpose.
@@ -257,6 +308,36 @@ class PictureFactory(object):
         if self._texts:
             for x, y, w, h in self._iter_texts_rects():
                 draw.rectangle(((x, y), (x + w, y + h)), outline='red')
+        # if self._logo:
+        #     for x, y, w, h in self._logo_rect():
+        #         draw.rectangle(((x, y), (x + w, y + h)), outline='red')
+
+    def add_logo(self, logo, align=CENTER):
+        """Add a Laga to the picture
+
+        """
+        # we need to check if there are texts
+        # if texts - the logo needs to be placed above the text and needs to be smaller
+        # if no texts - the logo needs te fill the place where the text would be
+        # or fill the place of one pic
+
+        # for beeing able to add a logo here we need to create a
+        # opencv image from it ... then pass it over to the methods (like shape)
+
+        # with open(logo, "rb") as logo_file:
+        #     self._logo = logo_file.read()
+        self._logo = logo
+        self._has_logo = True
+        self._logo_width = self.width - self._margin
+
+        if self.is_portrait:
+            if len(self._texts):
+                # there are texts - position logo above
+                self._logo_height = int(self.height // 6) - int(self.height // 8)
+            else:
+                self._logo_height = int(self.height // 6)
+        self._final = None
+
 
     def add_text(self, text, font_name, color, align=CENTER):
         """Add a new text.
@@ -273,7 +354,11 @@ class PictureFactory(object):
         assert align in [self.CENTER, self.RIGHT, self.LEFT], "Unknown aligment '{}'".format(align)
         self._texts.append((text, fonts.get_filename(font_name), color, align))
         if self.is_portrait:
-            self._texts_height = int(self.height // 6)
+            # we start here with adding a logo for stripes ... to be extended to all formats
+            if self._has_logo:
+                self._texts_height = int(self.height // 8)
+            else:
+                self._texts_height = int(self.height // 6)
         else:
             self._texts_height = int(self.height // 8)
         self._final = None  # Force rebuild
@@ -357,6 +442,9 @@ class PictureFactory(object):
 
             LOGGER.info("Use %s to concatenate images", self.name)
             image = self._build_matrix(image)
+
+            LOGGER.info("Use %s to draw logo", self.name)
+            image = self._build_logo(image)
 
             LOGGER.info("Use %s to assemble final image", self.name)
             self._final = self._build_final_image(image)
@@ -525,4 +613,21 @@ class OpenCvPictureFactory(PictureFactory):
                 image = np.zeros((self.height, self.width, 3), np.uint8)
                 image[:] = (self._background_color[0], self._background_color[1], self._background_color[2])
 
+        return image
+
+    def _build_logo(self, image):
+        """Draw the images matrix on the given image.
+
+        :param image: image object which depends on the child class implementation.
+        :type image: object
+
+        :return: image object which depends on the child class implementation.
+        :rtype: object
+        """
+
+        logo = cv2.cvtColor(cv2.imread(self._logo), cv2.COLOR_BGR2RGB)
+        pos_x, pos_y, max_w, max_h = self._logo_rect()
+        src_image, width, height = self._image_resize_keep_ratio(logo, max_w, max_h, crop=False)
+        pos_x, pos_y = pos_x + (max_w - width) * 2 // 3, pos_y + (max_h - height) * 2 // 3
+        self._image_paste(src_image, image, pos_x, pos_y)
         return image

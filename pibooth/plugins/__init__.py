@@ -8,6 +8,7 @@ from pibooth.plugins import hookspecs
 from pibooth.plugins.camera_plugin import CameraPlugin
 from pibooth.plugins.lights_plugin import LightsPlugin
 from pibooth.plugins.picture_plugin import PicturePlugin
+from pibooth.plugins.stripe_plugin import StripePlugin
 from pibooth.plugins.printer_plugin import PrinterPlugin
 from pibooth.plugins.view_plugin import ViewPlugin
 
@@ -71,7 +72,8 @@ class PiPluginManager(pluggy.PluginManager):
         plugins += [LightsPlugin(self),  # Last called
                     ViewPlugin(self),
                     PrinterPlugin(self),
-                    PicturePlugin(self),
+                    # PicturePlugin(self),
+                    StripePlugin(self),
                     CameraPlugin(self)]  # First called
 
         for plugin in plugins:

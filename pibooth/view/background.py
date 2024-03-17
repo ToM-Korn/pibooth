@@ -208,20 +208,24 @@ class IntroBackground(Background):
         if self._need_update and self.arrow_location != ARROW_HIDDEN:
             if self.arrow_location == ARROW_TOUCH:
                 if self.orientation == 'portrait':
-                    size = (self._rect.width * 0.5, self._rect.height * 0.5)
+                    size = (int(self._rect.width * 0.5), int(self._rect.height * 0.5))
                 else:
-                    size = (self._rect.width * 0.2, self._rect.height * 0.2)
+                    size = (int(self._rect.width * 0.2), int(self._rect.height * 0.2))
 
-                self.left_arrow = pictures.get_pygame_image("camera.png", size, vflip=False, color=self._text_color)
+                # self.left_arrow = pictures.get_pygame_image("camera.png", size, vflip=False, color=self._text_color)
+                self.left_arrow = pictures.get_pygame_image("camera.png", size, color=None)
 
                 if self.orientation == 'portrait':
                     x = int(self._rect.width * 0.25)
-                    y = int(self._rect.height * 0.6)
+                    y = int(self._rect.height * 0.25)
                 else:
                     x = int(self._rect.width * 0.2)
                     y = int(self._rect.height // 2)
             else:
-                size = (self._rect.width * 0.3, self._rect.height * 0.3)
+                if self.orientation == 'portrait':
+                    size = (self._rect.width * 0.5, self._rect.height * 0.5)
+                else:
+                    size = (self._rect.width * 0.3, self._rect.height * 0.3)
 
                 vflip = True if self.arrow_location == ARROW_TOP else False
                 self.left_arrow = pictures.get_pygame_image("arrow.png", size, vflip=vflip, color=self._text_color)
@@ -252,8 +256,8 @@ class IntroBackground(Background):
             if self.orientation == 'portrait':
                 rect = pygame.Rect(self._text_border, self._text_border,
                                    self._rect.width - 2 * self._text_border,
-                                   self._rect.height * 0.4 - self._text_border)
-                align = 'center'
+                                   self._rect.height // 2 - 2 * self._text_border)
+                align = 'top-center'
             else:
                 rect = pygame.Rect(self._text_border, self._text_border,
                                    self._rect.width / 2 - 2 * self._text_border,
@@ -274,10 +278,11 @@ class IntroBackground(Background):
 
 class IntroWithPrintBackground(IntroBackground):
 
-    def __init__(self, arrow_location=ARROW_BOTTOM, arrow_offset=0):
+    def __init__(self, arrow_location=ARROW_BOTTOM, arrow_offset=0, orientation='landscape'):
         IntroBackground.__init__(self, arrow_location, arrow_offset)
         self.right_arrow = None
         self.right_arrow_pos = None
+        self.orientation = orientation
 
     def __str__(self):
         """Return background final name.
@@ -290,18 +295,26 @@ class IntroWithPrintBackground(IntroBackground):
     def resize(self, screen):
         IntroBackground.resize(self, screen)
         if self._need_update and self.arrow_location != ARROW_HIDDEN:
+
             size = (self._rect.width * 0.1, self._rect.height * 0.1)
             if self.arrow_location == ARROW_TOUCH:
-                self.right_arrow = pictures.get_pygame_image("hand.png", size, hflip=False,
-                                                             vflip=False, angle=-70, color=self._text_color)
+                if self.orientation == 'portrait':
+                    self.right_arrow = pictures.get_pygame_image("hand.png", size, hflip=False,
+                                                                 vflip=False, angle=-70, color=self._text_color)
+                else:
+                    self.right_arrow = pictures.get_pygame_image("hand.png", size, hflip=False,
+                                                                 vflip=False, angle=-70, color=self._text_color)
             else:
                 vflip = True if self.arrow_location == ARROW_TOP else False
                 angle = -70 if self.arrow_location == ARROW_TOP else 70
                 self.right_arrow = pictures.get_pygame_image("arrow.png", size, hflip=False,
                                                              vflip=vflip, angle=angle, color=self._text_color)
 
-            x = int(self._rect.left + self._rect.width // 2
-                    - self.right_arrow.get_rect().width // 2)
+            if self.orientation == 'portrait':
+                x = int(self._rect.width // 2 - self.right_arrow.get_rect().width // 2)
+            else:
+                x = int(self._rect.left + self._rect.width // 2
+                        - self.right_arrow.get_rect().width // 2)
             if self.arrow_location == ARROW_TOP:
                 y = self._rect.top + 10
             else:
@@ -314,9 +327,16 @@ class IntroWithPrintBackground(IntroBackground):
         IntroBackground.resize_texts(self)
         text = get_translated_text("intro_print")
         if text:
-            rect = pygame.Rect(self._rect.width * 0.30 + self._text_border, 0,
-                               self._rect.width * 0.20 - 2 * self._text_border,
-                               self._rect.height * 0.3 - 2 * self._text_border)
+            if self.orientation == 'portrait':
+                # Rect(left, top, width, height) -> Rect
+                rect = pygame.Rect(self._text_border, self._text_border,
+                                   self._rect.width * 0.50 - 2 * self._text_border,
+                                   self._rect.height * 0.4 - 2 * self._text_border)
+
+            else:
+                rect = pygame.Rect(self._rect.width * 0.30 + self._text_border, 0,
+                                   self._rect.width * 0.20 - 2 * self._text_border,
+                                   self._rect.height * 0.3 - 2 * self._text_border)
             if self.arrow_location == ARROW_TOP:
                 rect.top = self._rect.height * 0.08
             else:
@@ -331,7 +351,7 @@ class IntroWithPrintBackground(IntroBackground):
 
 class ChooseBackground(Background):
 
-    def __init__(self, choices, arrow_location=ARROW_BOTTOM, arrow_offset=0):
+    def __init__(self, choices, arrow_location=ARROW_BOTTOM, arrow_offset=0, orientation='landscape'):
         Background.__init__(self, "choose")
         self.arrow_location = arrow_location
         self.arrow_offset = arrow_offset
@@ -405,7 +425,7 @@ class ChooseBackground(Background):
 
 class ChosenBackground(Background):
 
-    def __init__(self, choices, selected):
+    def __init__(self, choices, selected, orientation='landscape'):
         Background.__init__(self, "chosen")
         self.choices = choices
         self.selected = selected
@@ -421,7 +441,7 @@ class ChosenBackground(Background):
     def resize(self, screen):
         Background.resize(self, screen)
         if self._need_update:
-            size = (self._rect.width * 0.6, self._rect.height * 0.6)
+            size = (int(self._rect.width * 0.6), int(self._rect.height * 0.6))
 
             self.layout = pictures.get_pygame_layout_image(
                 self._text_color, self._background_color, self.selected, size)
@@ -445,7 +465,7 @@ class ChosenBackground(Background):
 
 class CaptureBackground(Background):
 
-    def __init__(self):
+    def __init__(self, orientation='landscape'):
         Background.__init__(self, "capture")
         self.left_people = None
         self.left_people_pos = None
@@ -481,7 +501,7 @@ class CaptureBackground(Background):
 
 class ProcessingBackground(Background):
 
-    def __init__(self):
+    def __init__(self, orientation='landscape'):
         Background.__init__(self, "processing")
 
     def resize_texts(self):
@@ -494,7 +514,7 @@ class ProcessingBackground(Background):
 
 class PrintBackground(Background):
 
-    def __init__(self, arrow_location=ARROW_BOTTOM, arrow_offset=0):
+    def __init__(self, arrow_location=ARROW_BOTTOM, arrow_offset=0, orientation='landscape'):
         Background.__init__(self, "print")
         self.arrow_location = arrow_location
         self.arrow_offset = arrow_offset
@@ -502,19 +522,29 @@ class PrintBackground(Background):
         self.right_arrow_pos = None
         self.left_arrow = None
         self.left_arrow_pos = None
+        self.orientation = orientation
 
     def resize(self, screen):
         Background.resize(self, screen)
         if self._need_update and self.arrow_location != ARROW_HIDDEN:
-
+            # this is the arrow for the print button
+            # if arrow is touch a printer symbol is displayed
             if self.arrow_location == ARROW_TOUCH:
-                size = (self._rect.width // 4, self._rect.height // 4)
+                # todo set touch icon
+                if self.orientation == 'portrait':
+                    size = (self._rect.width *0.4, self._rect.height *0.4)
+                else:
+                    size = (self._rect.width // 4, self._rect.height // 4)
                 # Right arrow
                 self.right_arrow = pictures.get_pygame_image(
                     "printer_touch.png", size, hflip=False, vflip=False, color=self._text_color)
-                x = int(self._rect.left + self._rect.width * 0.70
-                        - self.right_arrow.get_rect().width // 2)
-                y = int(self._rect.top + self._rect.height * 0.45)
+                if self.orientation == 'portrait':
+                    x = int(self._rect.right - self._rect.width *0.5)
+                    y = int(self._rect.height * 0.25)
+                else:
+                    x = int(self._rect.left + self._rect.width * 0.70
+                            - self.right_arrow.get_rect().width // 2)
+                    y = int(self._rect.top + self._rect.height * 0.45)
             else:
                 size = (self._rect.width * 0.3, self._rect.height * 0.3)
 
@@ -534,24 +564,38 @@ class PrintBackground(Background):
             self.right_arrow_pos = (x + self.arrow_offset, y)
 
             # Left arrow
-            size = (self._rect.width * 0.1, self._rect.height * 0.1)
+            if self.orientation == 'portrait':
+                size = (self._rect.width * 0.4, self._rect.height * 0.4)
+
+            else:
+                size = (self._rect.width * 0.1, self._rect.height * 0.1)
 
             if self.arrow_location == ARROW_TOUCH:
-                self.left_arrow = pictures.get_pygame_image(
-                    "hand.png", size, hflip=False, vflip=False, angle=70, color=self._text_color)
+                if self.orientation == 'portrait':
+                    ## todo create a wastebin that can change color
+                    self.left_arrow = pictures.get_pygame_image(
+                        "trash.png", size, hflip=False, vflip=False, angle=0, color=self._text_color)
+
+                else:
+                    self.left_arrow = pictures.get_pygame_image(
+                        "hand.png", size, hflip=False, vflip=False, angle=70, color=self._text_color)
             else:
                 vflip = True if self.arrow_location == ARROW_TOP else False
                 angle = 70 if self.arrow_location == ARROW_TOP else -70
                 self.left_arrow = pictures.get_pygame_image(
                     "arrow.png", size, hflip=False, vflip=vflip, angle=angle, color=self._text_color)
 
-            x = int(self._rect.left + self._rect.width // 2
-                    - self.left_arrow.get_rect().width // 2)
-
-            if self.arrow_location == ARROW_TOP:
-                y = self._rect.top + 10
+            if self.orientation == 'portrait':
+                x = int(self._rect.width * 0.25 - self.left_arrow.get_rect().width * 0.5)
+                y = int(self._rect.height * 0.5 + self.left_arrow.get_rect().height * 0.5)
             else:
-                y = int(self._rect.bottom - self.left_arrow.get_rect().height * 1.1)
+                x = int(self._rect.left + self._rect.width // 2
+                        - self.left_arrow.get_rect().width // 2)
+
+                if self.arrow_location == ARROW_TOP:
+                    y = self._rect.top + 10
+                else:
+                    y = int(self._rect.bottom - self.left_arrow.get_rect().height * 1.1)
 
             self.left_arrow_pos = (x - self.arrow_offset, y)
 
@@ -569,10 +613,18 @@ class PrintBackground(Background):
                                self._rect.height * 0.6 - self._text_border)
             align = 'bottom-center'
         elif self.arrow_location == ARROW_TOUCH:
-            rect = pygame.Rect(self._rect.width / 2 + self._text_border, self._text_border,
-                               self._rect.width / 2 - 2 * self._text_border,
-                               self._rect.height * 0.4 - self._text_border)
-            align = 'bottom-center'
+            if self.orientation == 'portrait':
+                rect = pygame.Rect(self._rect.width * 0.5 + self._text_border,
+                                   self._text_border,
+                                   self._rect.width * 0.5 - 2 * self._text_border,
+                                   self._rect.height * 0.5 - 2 * self._text_border)
+                align = 'top-center'
+
+            else:
+                rect = pygame.Rect(self._rect.width / 2 + self._text_border, self._text_border,
+                                   self._rect.width / 2 - 2 * self._text_border,
+                                   self._rect.height * 0.4 - self._text_border)
+                align = 'bottom-center'
         else:
             rect = pygame.Rect(self._rect.width / 2 + self._text_border, self._rect.height * 0.4,
                                self._rect.width / 2 - 2 * self._text_border,
@@ -582,13 +634,21 @@ class PrintBackground(Background):
 
         text = get_translated_text("print_forget")
         if text:
-            rect = pygame.Rect(self._rect.width // 2, 0,
+            if self.orientation == 'portrait':
+
+                rect = pygame.Rect(self._rect.width * 0.5 + self._text_border,
+                                   self._rect.height * 0.5 + self._text_border,
+                               self._rect.width * 0.5 - 2 * self._text_border,
+                               self._rect.height * 0.5 - 2 * self._text_border)
+
+            else:
+                rect = pygame.Rect(self._rect.width // 2, 0,
                                self._rect.width // 5 - 2 * self._text_border,
                                self._rect.height * 0.3 - 2 * self._text_border)
-            if self.arrow_location == ARROW_TOP:
-                rect.top = self._rect.height * 0.08
-            else:
-                rect.bottom = self._rect.height - self._rect.height * 0.08
+                if self.arrow_location == ARROW_TOP:
+                    rect.top = self._rect.height * 0.08
+                else:
+                    rect.bottom = self._rect.height - self._rect.height * 0.08
 
             self._write_text(text, rect)
 
