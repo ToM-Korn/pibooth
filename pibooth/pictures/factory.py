@@ -443,8 +443,8 @@ class PictureFactory(object):
             LOGGER.info("Use %s to concatenate images", self.name)
             image = self._build_matrix(image)
 
-            LOGGER.info("Use %s to draw logo", self.name)
-            image = self._build_logo(image)
+            # LOGGER.info("Use %s to draw logo", self.name)
+            # image = self._build_logo(image)
 
             LOGGER.info("Use %s to assemble final image", self.name)
             self._final = self._build_final_image(image)
