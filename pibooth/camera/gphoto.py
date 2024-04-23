@@ -13,6 +13,9 @@ from pibooth.utils import LOGGER, PoolingTimer, pkill
 from pibooth.language import get_translated_text
 from pibooth.camera.base import BaseCamera
 
+import subprocess as sp
+import serial
+
 
 def get_gp_camera_proxy(port=None):
     """Return camera proxy if a gPhoto2 compatible camera is found
@@ -83,6 +86,16 @@ class GpCamera(BaseCamera):
         self._gp_logcb = None
         self._preview_compatible = True
         self._preview_viewfinder = False
+
+        req = sp.run("ls /dev | grep USB", shell=True, capture_output=True)
+
+        if req.returncode == 0:
+            port = req.stdout.decode().strip()
+            port = "/dev/" + port
+            self.com = serial.Serial(port, timeout=1)
+
+            LOGGER.info(f"Communication Port for Serial is: {port}")
+
 
     def _specific_initialization(self):
         """Camera initialization.
@@ -230,7 +243,12 @@ class GpCamera(BaseCamera):
             raise ValueError("Start time shall be greater than 0")
 
         # this action is performed on canon dslr to focus during the countdown
-        self.set_config_value('actions', 'autofocusdrive', '1')
+        # self.set_config_value('actions', 'autofocusdrive', '1')
+        # this would be the point to make the focus by hardware
+
+        # Halfpress Camera Button by Hardware
+        self.com.write(b'CAMFOC\n')
+        LOGGER.info("Focus Camera")
 
         shown = False
         first_loop = True
@@ -258,7 +276,7 @@ class GpCamera(BaseCamera):
             if updated_rect:
                 pygame.display.update(updated_rect)
 
-        self.set_config_value('actions', 'cancelautofocus', '1')
+        # self.set_config_value('actions', 'cancelautofocus', '1')
 
         self._show_overlay(get_translated_text('smile'), alpha)
         self._window.show_image(self._get_preview_image())
@@ -301,6 +319,11 @@ class GpCamera(BaseCamera):
 
         # if self.capture_iso != self.preview_iso:
         #     self.set_config_value('imgsettings', 'iso', self.capture_iso)
+
+        # Fullpress Camera Button by Hardware
+        self.com.write(b'CAMSHO\n')
+        LOGGER.info("Take Picture")
+
 
         self._captures.append((self._cam.capture(gp.GP_CAPTURE_IMAGE), effect))
         time.sleep(0.3)  # Necessary to let the time for the camera to save the image
