@@ -243,7 +243,8 @@ class GpCamera(BaseCamera):
             raise ValueError("Start time shall be greater than 0")
 
         # this action is performed on canon dslr to focus during the countdown
-        self.set_config_value('actions', 'autofocusdrive', '1')
+        # self.set_config_value('actions', 'autofocusdrive', '1')
+        self.set_config_value('actions', 'manualfocusdrive', '4')
         # this would be the point to make the focus by hardware
 
         # Halfpress Camera Button by Hardware
@@ -276,7 +277,7 @@ class GpCamera(BaseCamera):
             if updated_rect:
                 pygame.display.update(updated_rect)
 
-        self.set_config_value('actions', 'cancelautofocus', '1')
+        # self.set_config_value('actions', 'cancelautofocus', '1')
 
         self._show_overlay(get_translated_text('smile'), alpha)
         self._window.show_image(self._get_preview_image())
