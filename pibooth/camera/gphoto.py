@@ -244,7 +244,7 @@ class GpCamera(BaseCamera):
 
         # this action is performed on canon dslr to focus during the countdown
         # self.set_config_value('actions', 'autofocusdrive', '1')
-        self.set_config_value('capturesettings', 'focusmode' '1') # set focusmode to AI Focus / AIServo = 2
+        self.set_config_value('capturesettings', 'focusmode', '1') # set focusmode to AI Focus / AIServo = 2
         self.set_config_value('actions', 'manualfocusdrive', '6') # set focus to far 3
 
         # Manual Focus Drive Options
