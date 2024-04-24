@@ -244,7 +244,7 @@ class GpCamera(BaseCamera):
 
         # this action is performed on canon dslr to focus during the countdown
         # self.set_config_value('actions', 'autofocusdrive', '1')
-        self.set_config_value('actions', 'manualfocusdrive', '4')
+        self.set_config_value('actions', 'manualfocusdrive', '6')
         # this would be the point to make the focus by hardware
 
         # Halfpress Camera Button by Hardware
