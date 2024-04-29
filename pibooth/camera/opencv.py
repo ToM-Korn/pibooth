@@ -72,12 +72,21 @@ class CvCamera(BaseCamera):
         """Add an image as an overlay.
         """
         if self._window:  # No window means no preview displayed
-            rect = self.get_rect()
-            self._overlay_alpha = alpha
-            pil_image = self.build_overlay((rect.width, rect.height), str(text), 255)
-            # Remove alpha from overlay
-            self._overlay = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGBA2RGB)
+            # rect = self.get_rect()
+            # self._overlay_alpha = alpha
+            # pil_image = self.build_overlay((rect.width, rect.height), str(text), 255)
+            # # Remove alpha from overlay
+            # self._overlay = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGBA2RGB)
 
+            ct_rect = self.get_countdown_rect()
+            ct_pil_image = self.build_countdown_top((ct_rect.width, ct_rect.height), str(text))
+            LOGGER.debug("created countdown image to display")
+            ct_pil_image.save("countdown_img"+text+".png")
+            updated = self._window.show_image(ct_pil_image, pos='top')
+
+            pygame.event.pump()
+            if updated:
+                pygame.display.update(updated)
     def _rotate_image(self, image, rotation):
         """Rotate an OpenCV image, same direction than RpiCamera.
         """

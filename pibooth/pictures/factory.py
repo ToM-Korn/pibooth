@@ -86,7 +86,9 @@ class PictureFactory(object):
         # and depending on the logo format
         # 1st step is to take a landscape logo and add it
         # above the text
-        total_height = self.height - self._logo_height - self._texts_height - 2 * self._margin
+        # 2024 04  killed ... logo can be added with background....
+        # total_height = self.height - self._logo_height - self._texts_height - 2 * self._margin
+        total_height = self.height - self._texts_height - 2* self._margin
 
         if len(self._images) == 1:
             image_width = total_width
@@ -94,15 +96,21 @@ class PictureFactory(object):
         elif 2 <= len(self._images) < 4:
             if self.is_portrait:
                 image_width = total_width
-                # calc hight of one image by taking full hight minus margins needed
+                # calc hight of one image by taking full height minus margins needed
                 # divided by images
                 image_height = (total_height - (len(self._images) - 1) * self._margin) // len(self._images)
             else:
                 image_width = (total_width - (len(self._images) - 1) * self._margin) // len(self._images)
                 image_height = total_height
         else:
-            image_width = (total_width - self._margin) // 2
-            image_height = (total_height - self._margin) // 2
+            if self.is_portrait:
+                image_width = total_width
+                # calc hight of one image by taking full height minus margins needed
+                # divided by images
+                image_height = (total_height - (len(self._images) - 1) * self._margin) // len(self._images)
+            else:
+                image_width = (total_width - self._margin) // 2
+                image_height = (total_height - self._margin) // 2
 
         yield image_x, image_y, image_width, image_height
 
@@ -121,13 +129,17 @@ class PictureFactory(object):
             yield image_x, image_y, image_width, image_height
 
         if len(self._images) == 4:
-            image_x += image_width + self._margin
-            yield image_x, image_y, image_width, image_height
-            image_y += image_height + self._margin
-            image_x = self._margin
-            yield image_x, image_y, image_width, image_height
-            image_x += image_width + self._margin
-            yield image_x, image_y, image_width, image_height
+            if self.is_portrait:
+                image_y += image_height + self._margin
+                yield image_x, image_y, image_width, image_height
+            else:
+                image_x += image_width + self._margin
+                yield image_x, image_y, image_width, image_height
+                image_y += image_height + self._margin
+                image_x = self._margin
+                yield image_x, image_y, image_width, image_height
+                image_x += image_width + self._margin
+                yield image_x, image_y, image_width, image_height
 
     def _iter_texts_rects(self, interline=None):
         """Yield top-left coordinates and max size rectangle for each text.
@@ -355,10 +367,11 @@ class PictureFactory(object):
         self._texts.append((text, fonts.get_filename(font_name), color, align))
         if self.is_portrait:
             # we start here with adding a logo for stripes ... to be extended to all formats
-            if self._has_logo:
-                self._texts_height = int(self.height // 8)
-            else:
-                self._texts_height = int(self.height // 6)
+            # killed feature ... can be done with simple overlay or background image
+            # if self._has_logo:
+            #     self._texts_height = int(self.height // 8)
+            # else:
+            self._texts_height = int(self.height // 6)
         else:
             self._texts_height = int(self.height // 8)
         self._final = None  # Force rebuild

@@ -154,16 +154,16 @@ class PiWindow(object):
             return  # Dont show counter: no picture taken
 
         center = self.surface.get_rect().center
-        radius = 10
-        border = 20
+        radius = 30
+        border = 40
         x = center[0] - (2 * radius * self._capture_number[1] + border * (self._capture_number[1] - 1)) // 2
         y = self.surface.get_size()[1] - radius - border
         for nbr in range(self._capture_number[1]):
             gfxdraw.aacircle(self.surface, x, y, radius, self.text_color)
             if self._capture_number[0] > nbr:
                 # Because anti-aliased filled circle doesn't exist
-                gfxdraw.aacircle(self.surface, x, y, radius - 3, self.text_color)
-                gfxdraw.filled_circle(self.surface, x, y, radius - 3, self.text_color)
+                gfxdraw.aacircle(self.surface, x, y, radius - 5, self.text_color)
+                gfxdraw.filled_circle(self.surface, x, y, radius - 5, self.text_color)
             x += (2 * radius + border)
 
     def _update_print_number(self):
@@ -252,7 +252,8 @@ class PiWindow(object):
         """
         Return the position of the given image to be put on the bottom of the screen
         """
-        pos = (self.surface.get_rect().centerx, self.surface.get_rect().centery - self.surface.get_rect().centery // 2)
+        # pos = (self.surface.get_rect().centerx, self.surface.get_rect().centery - self.surface.get_rect().centery // 2)
+        pos = (self.surface.get_rect().centerx, image.get_rect().height // 2)
         return image.get_rect(center=pos) if image else pos
 
 
@@ -372,7 +373,7 @@ class PiWindow(object):
             self._update_background(background.FinishedWithImageBackground(pil_image.size))
             self._update_foreground(pil_image, self.FULLSCREEN)
         else:
-            self._update_background(background.FinishedBackground())
+            self._update_background(background.FinishedBackground(orientation=self.orientation))
 
     @contextlib.contextmanager
     def flash(self, count):
@@ -407,7 +408,7 @@ class PiWindow(object):
             raise ValueError("Total number of captures shall be greater than 0")
 
         self._capture_number = (current_nbr, total_nbr)
-        self._update_background(background.CaptureBackground())
+        self._update_background(background.CaptureBackground(orientation=self.orientation))
         if self._current_foreground:
             self._update_foreground(*self._current_foreground)
         pygame.display.update()

@@ -478,16 +478,17 @@ class CaptureBackground(Background):
             images_height = self._rect.height / 4
             size = (images_height * 2, images_height)
 
-            self.left_people = pictures.get_pygame_image("capture_left.png", size=size,
-                                                         color=self._text_color)
-            self.right_people = pictures.get_pygame_image("capture_right.png", size=size,
-                                                          color=self._text_color)
+
+            # self.left_people = pictures.get_pygame_image("capture_left.png", size=size,
+            #                                              color=self._text_color)
+            # self.right_people = pictures.get_pygame_image("capture_right.png", size=size,
+            #                                               color=self._text_color)
 
             x = int(self._rect.right - size[0])
             y = int(self._rect.bottom - images_height)
 
-            self.left_people_pos = (0, y)
-            self.right_people_pos = (x + size[0] - 1.5 * self.right_people.get_rect().width, y)
+            # self.left_people_pos = (0, y)
+            # self.right_people_pos = (x + size[0] - 1.5 * self.right_people.get_rect().width, y)
 
             if self._show_outlines:
                 self._outlines.append((self._make_outlines(size), (0, y)))
@@ -495,8 +496,8 @@ class CaptureBackground(Background):
 
     def paint(self, screen):
         Background.paint(self, screen)
-        screen.blit(self.left_people, self.left_people_pos)
-        screen.blit(self.right_people, self.right_people_pos)
+        # screen.blit(self.left_people, self.left_people_pos)
+        # screen.blit(self.right_people, self.right_people_pos)
 
 
 class ProcessingBackground(Background):
@@ -661,12 +662,14 @@ class PrintBackground(Background):
 
 class FinishedBackground(Background):
 
-    def __init__(self):
+    def __init__(self, orientation='landscape'):
         Background.__init__(self, "finished")
         self.left_people = None
         self.left_people_pos = None
         self.right_people = None
         self.right_people_pos = None
+        self.orientation = orientation
+
 
     def resize(self, screen):
         Background.resize(self, screen)
@@ -677,13 +680,13 @@ class FinishedBackground(Background):
             right_rect.top = self._rect.centery - right_rect.centery
             right_rect.right = self._rect.right - 10
 
-            self.left_people = pictures.get_pygame_image("finished_left.png", size=left_rect.size,
-                                                         color=self._text_color)
-            self.right_people = pictures.get_pygame_image("finished_right.png", size=right_rect.size,
-                                                          color=self._text_color)
+            # self.left_people = pictures.get_pygame_image("finished_left.png", size=left_rect.size,
+            #                                              color=self._text_color)
+            # self.right_people = pictures.get_pygame_image("finished_right.png", size=right_rect.size,
+            #                                               color=self._text_color)
 
-            self.left_people_pos = self.left_people.get_rect(center=left_rect.center).topleft
-            self.right_people_pos = self.right_people.get_rect(center=right_rect.center).topleft
+            # self.left_people_pos = self.left_people.get_rect(center=left_rect.center).topleft
+            # self.right_people_pos = self.right_people.get_rect(center=right_rect.center).topleft
 
             if self._show_outlines:
                 self._outlines.append((self._make_outlines(left_rect.size), left_rect.topleft))
@@ -692,17 +695,23 @@ class FinishedBackground(Background):
     def resize_texts(self):
         """Update text surfaces.
         """
-        rect = pygame.Rect(0, 0, self._rect.width * 0.35, self._rect.height * 0.4)
-        rect.center = self._rect.center
-        rect.bottom = self._rect.bottom - 10
-        Background.resize_texts(self, rect)
+        if self.orientation=='portrait':
+            rect = pygame.Rect(0, 0, self._rect.width * 0.9, self._rect.height * 0.4)
+            rect.center = self._rect.center
+            # rect.bottom = self._rect.centery
+            Background.resize_texts(self, rect)
+        else:
+            rect = pygame.Rect(0, 0, self._rect.width * 0.35, self._rect.height * 0.4)
+            rect.center = self._rect.center
+            rect.bottom = self._rect.bottom - 10
+            Background.resize_texts(self, rect)
 
     def paint(self, screen):
         Background.paint(self, screen)
-        if self.left_people:
-            screen.blit(self.left_people, self.left_people_pos)
-        if self.right_people:
-            screen.blit(self.right_people, self.right_people_pos)
+        # if self.left_people:
+        #     screen.blit(self.left_people, self.left_people_pos)
+        # if self.right_people:
+        #     screen.blit(self.right_people, self.right_people_pos)
 
 
 class FinishedWithImageBackground(FinishedBackground):

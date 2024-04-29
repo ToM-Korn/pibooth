@@ -465,6 +465,11 @@ def main():
     group.add_argument("-q", "--quiet", dest='logging', action='store_const', const=logging.WARNING,
                        help=u"report only errors and warnings", default=logging.INFO)
 
+    # options is the config given -> evant
+    # if not available it defaults to ~/.config/pibooth
+    # this might be the place to update and scan for latest config
+    # connect to server and fetch current event
+    # set options to this event
     options = parser.parse_args()
 
     if not options.nolog:

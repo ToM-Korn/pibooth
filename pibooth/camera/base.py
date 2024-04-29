@@ -70,11 +70,38 @@ class BaseCamera(object):
         in order to fit to the defined window.
         """
         rect = self._window.get_rect(absolute=True)
+
         size = (rect.width - 2 * self._border, rect.height - 2 * self._border)
         if max_size:
             size = (min(size[0], max_size[0]), min(size[1], max_size[1]))
         res = sizing.new_size_keep_aspect_ratio(self.resolution, size)
         return pygame.Rect(rect.centerx - res[0] // 2, rect.centery - res[1] // 2, res[0], res[1])
+
+    def get_countdown_rect(self):
+        """Return a Rect object (as defined in pygame) for positioning the countdawn text
+         to fit the defined window
+        """
+        rect = self._window.get_rect(absolute=True)
+
+        size = (rect.width - 2 * self._border, rect.height // 4)
+        # here for portrait mode
+        return pygame.Rect(rect.centerx - size[0] // 2, (rect.centery - size[1] // 2) , size[0], size[1])
+
+    def build_countdown_top(self, size, text):
+        """Return a PIL image with the given text that can be used
+        as an countdown above image
+        """
+        image = Image.new('RGB', size, (255,255,255))
+        draw = ImageDraw.Draw(image)
+
+        font = fonts.get_pil_font(text, fonts.CURRENT, 0.9 * size[0], 0.9 * size[1])
+        txt_width, txt_height = draw.textsize(text, font=font)
+
+        position = ((size[0] - txt_width) // 2, (size[1] - txt_height) // 2)
+        # position = ((size[0] - txt_width) // 2,  -(size[1] - txt_height) * 3)
+        draw.text(position, text, (0, 0, 0), font=font)
+        return image
+
 
     def build_overlay(self, size, text, alpha):
         """Return a PIL image with the given text that can be used
@@ -87,7 +114,7 @@ class BaseCamera(object):
         txt_width, txt_height = draw.textsize(text, font=font)
 
         position = ((size[0] - txt_width) // 2, (size[1] - txt_height) // 2 - size[1] // 10)
-        draw.text(position, text, (255, 255, 255, alpha), font=font)
+        draw.text(position, text, (255, 0, 0, alpha), font=font)
         return image
 
     def preview(self, window, flip=True):

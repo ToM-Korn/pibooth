@@ -38,15 +38,20 @@ if req.returncode == 0:
 @pibooth.hookimpl
 def state_wait_enter():
     # set the lights to Pulse
-    com.write(b'LIGPUL\n')
-    LOGGER.info("Light set to Pulse")
-
+    if com:
+        com.write(b'LIGPUL\n')
+        LOGGER.info("Light set to Pulse")
+    else:
+        LOGGER.info("No MC found to talk to.")
 @pibooth.hookimpl
 def state_wait_exit():
     # a photo will be taken
     # set the lights to full power
-    com.write(b'LIGON\n')
-    LOGGER.info("Light set to ON")
+    if com:
+        com.write(b'LIGON\n')
+        LOGGER.info("Light set to ON")
+    else:
+        LOGGER.info("No MC found to talk to.")
 
 @pibooth.hookimpl
 def state_wait_do():
@@ -54,14 +59,15 @@ def state_wait_do():
     # in this position we read the serial
     # if the command is "SHUTDOWN"
     # we confirm the shutdown and poweroff
-    line = com.readline()
-    if line != b'':
-        line = line.decode("UTF-8")
-        line = line.strip()
-        if line != '':
-            LOGGER.info(f"Serial Input Line: {line}")
-            if line == 'SHUTDOWN':
-                LOGGER.info("Shutting down System")
-                os.system('poweroff')
+    if com:
+        line = com.readline()
+        if line != b'':
+            line = line.decode("UTF-8")
+            line = line.strip()
+            if line != '':
+                LOGGER.info(f"Serial Input Line: {line}")
+                if line == 'SHUTDOWN':
+                    LOGGER.info("Shutting down System")
+                    os.system('poweroff')
 
 

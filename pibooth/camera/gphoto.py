@@ -122,8 +122,21 @@ class GpCamera(BaseCamera):
         """Add an image as an overlay.
         """
         if self._window:  # No window means no preview displayed
-            rect = self.get_rect()
-            self._overlay = self.build_overlay((rect.width, rect.height), str(text), alpha)
+            # modification TK to add countdown over image not as overlay
+            # rect = self.get_countdown_rect()
+            # rect = self.get_rect()
+            # self._overlay = self.build_countdown_top((rect.width, rect.height), str(text), alpha)
+            # self._overlay = self.build_overlay((rect.width, rect.height), str(text), alpha)
+
+            ct_rect = self.get_countdown_rect()
+            ct_pil_image = self.build_countdown_top((ct_rect.width, ct_rect.height), str(text))
+            LOGGER.debug("created countdown image to display")
+            #ct_pil_image.save("countdown_img"+text+".png")
+            updated = self._window.show_image(ct_pil_image, pos='top')
+
+            pygame.event.pump()
+            if updated:
+                pygame.display.update(updated)
 
     def _rotate_image(self, image, rotation):
         """Rotate a PIL image, same direction than RpiCamera.
@@ -336,6 +349,29 @@ class GpCamera(BaseCamera):
         # self.com.write(b'CAMSHO\n')
         # LOGGER.info("Take Picture")
 
+        # one option here for a better timing would be to
+        # use /main/actions/eosremoterelease
+        # Label: Canon EOS Remote Release
+        # Readonly: 0
+        # Type: RADIO
+        # Current: None
+        # Choice: 0 None
+        # Choice: 1 Press Half
+        # Choice: 2 Press Full
+        # Choice: 3 Release Half
+        # Choice: 4 Release Full
+        # Choice: 5 Immediate
+        # Choice: 6 Press 1
+        # Choice: 7 Press 2
+        # Choice: 8 Press 3
+        # Choice: 9 Release 1
+        # Choice: 10 Release 2
+        # Choice: 11 Release 3
+        # END
+        # problem is, that when focus is not correct and we use for example 5
+        # the picture might be taken but unsharp
+        # with gp.GP_CAPTURE_IMAGE the Camera first focuses and then shoots
+        # but this leads to delays in some places
 
         self._captures.append((self._cam.capture(gp.GP_CAPTURE_IMAGE), effect))
         # self._captures.append((self._cam.file_get))

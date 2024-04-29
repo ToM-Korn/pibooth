@@ -59,6 +59,7 @@ class StateMachine(object):
             if self.failsafe_state and self.active_state != self.failsafe_state:
                 LOGGER.error(str(ex))
                 LOGGER.debug('Back to failsafe state due to error:', exc_info=True)
+                # TODO send error report to admin with model / serial / log
                 new_state_name = self.failsafe_state
             else:
                 raise
