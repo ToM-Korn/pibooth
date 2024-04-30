@@ -501,7 +501,7 @@ class GpCamera(BaseCamera):
             img.folder = "/store_00020001/DCIM/100CANON/"
             img.name = cur_file
 
-            self._captures.append((img, None))
+            self._captures.append((img, "none"))
             counter -= 1
 
     def quit(self):
