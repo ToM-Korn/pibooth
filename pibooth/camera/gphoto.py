@@ -486,16 +486,18 @@ class GpCamera(BaseCamera):
 
         counter = 3
 
+        time.sleep(3)
+
         _, files_o = gp.gp_camera_folder_list_files(self._cam, "/store_00020001/DCIM/100CANON/")
         files = files_o.keys()
 
+        LOGGER.debug("files on cam")
         for x in files:
             LOGGER.debug(x)
 
         while counter > 0:
             cur_file = files[-counter]  # we fetch the name of the last file on the cam
-
-            LOGGER.debug(cur_file)
+            LOGGER.debug(f"adding file: {cur_file} - counter {counter}")
 
             img = TKimg()
             img.folder = "/store_00020001/DCIM/100CANON/"
