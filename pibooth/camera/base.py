@@ -5,6 +5,7 @@ from PIL import Image, ImageDraw
 
 from pibooth import fonts
 from pibooth.pictures import sizing
+from pibooth.utils import LOGGER, PoolingTimer, pkill
 
 
 class BaseCamera(object):
@@ -149,6 +150,9 @@ class BaseCamera(object):
         """
         images = []
         for data in self._captures:
+            LOGGER.debug("In base get_captures")
+            LOGGER.debug(data)
+
             images.append(self._post_process_capture(data))
         self.drop_captures()
         return images

@@ -22,6 +22,8 @@ class TKimg():
     folder = None
     name = None
 
+    def __str__(self):
+        return f"{self.folder}{self.name}"
 
 def get_gp_camera_proxy(port=None):
     """Return camera proxy if a gPhoto2 compatible camera is found
@@ -187,6 +189,7 @@ class GpCamera(BaseCamera):
         """
 
         # self.img_counter = 0
+        LOGGER.debug(capture_data)
 
         gp_path, effect = capture_data
         camera_file = self._cam.file_get(gp_path.folder, gp_path.name, gp.GP_FILE_TYPE_NORMAL)
@@ -404,6 +407,7 @@ class GpCamera(BaseCamera):
 
         files = files_o.keys()
 
+        LOGGER.debug(files)
         cur_file = files[-1] # we fetch the name of the last file on the cam
 
 
