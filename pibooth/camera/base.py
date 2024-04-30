@@ -151,7 +151,7 @@ class BaseCamera(object):
         images = []
         for data in self._captures:
             LOGGER.debug("In base get_captures")
-            LOGGER.debug(data)
+            LOGGER.debug(data[0].name)
 
             images.append(self._post_process_capture(data))
         self.drop_captures()
