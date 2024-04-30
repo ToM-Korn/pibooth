@@ -244,7 +244,7 @@ class GpCamera(BaseCamera):
 
         if self._preview_compatible:
             if self._preview_viewfinder:
-                self.set_config_value('imgsettings', 'iso', 1600)
+                self.set_config_value('imgsettings', 'iso', 400)
                 self.set_config_value('actions', 'viewfinder', 1)
             self._window.show_image(self._get_preview_image())
 
@@ -352,6 +352,42 @@ class GpCamera(BaseCamera):
         time.sleep(0.25)
         self.com.write(b'CAMSHO\n')
         time.sleep(1)
+
+
+        # canon image folder
+        # /store_00020001/DCIM/100CANON
+
+        # to list files on cam
+        # gphoto2 - -list - files
+        #  #148   IMG_7557.JPG               rd  2900 KB image/jpeg 1700978980
+        #  #149   IMG_7558.JPG               rd  3293 KB image/jpeg 1700979078
+        #  #150   IMG_7559.JPG               rd  3021 KB image/jpeg 1700979088
+
+        files = gp.gp_camera_folder_list_files(self._cam, "/store_00020001/DCIM/100CANON/")
+
+        LOGGER.debug(files)
+
+        cur_file = files[-1]
+
+        LOGGER.debug(cur_file)
+
+        # to download specific file number from list
+        # gphoto2 --get-file 150
+
+        img = bytes()
+        gp.gp_camera_file_read(self._cam, "/store_00020001/DCIM/100CANON/", cur_file, gp.GP_FILE_TYPE_RAW, 0, img)
+
+        LOGGER.debug(img)
+
+        # to delete file
+        # gphoto2 -d /store_00020001/DCIM/100CANON/IMG_7559.JPG
+        # or
+        # def gp_camera_file_delete(camera, folder, file, context): # real signature unknown; restored from __doc__
+
+        gp.gp_camera_file_delete(self._cam, "/store_00020001/DCIM/100CANON/", cur_file)
+
+        self._captures.append((img, effect))
+
 
         #
         # effect = str(effect).lower()
