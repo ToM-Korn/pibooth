@@ -341,7 +341,9 @@ class GpCamera(BaseCamera):
         if self._preview_viewfinder:
             self.set_config_value('actions', 'viewfinder', 0)
 
-        self.set_config_value('actions', 'eosremoterelease', 5)
+        # self.set_config_value('actions', 'eosremoterelease', 5)
+        self.set_config_value('actions', 'eosremoterelease', 2)
+        # self.set_config_value('actions', 'eosremoterelease', 8)
 
         #
         # effect = str(effect).lower()
