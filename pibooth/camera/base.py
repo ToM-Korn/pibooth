@@ -148,6 +148,8 @@ class BaseCamera(object):
     def get_captures(self):
         """Return all buffered captures as PIL images (buffer dropped after call).
         """
+        self._cam.collect_captures()
+
         images = []
         for data in self._captures:
             LOGGER.debug("In base get_captures")

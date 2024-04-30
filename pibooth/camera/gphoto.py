@@ -371,7 +371,24 @@ class GpCamera(BaseCamera):
         self.com.write(b'CAMSHO\n')
         # if we go on too fast we get a
         # [-110] I/O in progress
-        time.sleep(2)
+        time.sleep(1)
+
+        # # collect captures
+        # _, files_o = gp.gp_camera_folder_list_files(self._cam, "/store_00020001/DCIM/100CANON/")
+        # files = files_o.keys()
+        #
+        # for x in files:
+        #     LOGGER.debug(x)
+        # cur_file = files[-1] # we fetch the name of the last file on the cam
+        #
+        #
+        # LOGGER.debug(cur_file)
+        #
+        # img = TKimg()
+        # img.folder ="/store_00020001/DCIM/100CANON/"
+        # img.name = cur_file
+        #
+        # self._captures.append((img, effect))
 
 
         # canon image folder
@@ -383,7 +400,6 @@ class GpCamera(BaseCamera):
         #  #149   IMG_7558.JPG               rd  3293 KB image/jpeg 1700979078
         #  #150   IMG_7559.JPG               rd  3021 KB image/jpeg 1700979088
 
-        _, files_o = gp.gp_camera_folder_list_files(self._cam, "/store_00020001/DCIM/100CANON/")
 
         # files_o is Swig Object
         # dir ->
@@ -407,14 +423,14 @@ class GpCamera(BaseCamera):
         #     # gives None
         #     LOGGER.debug(v)
 
-        files = files_o.keys()
-
-        for x in files:
-            LOGGER.debug(x)
-        cur_file = files[-1] # we fetch the name of the last file on the cam
-
-
-        LOGGER.debug(cur_file)
+        # files = files_o.keys()
+        #
+        # for x in files:
+        #     LOGGER.debug(x)
+        # cur_file = files[-1] # we fetch the name of the last file on the cam
+        #
+        #
+        # LOGGER.debug(cur_file)
 
         # to download specific file number from list
         # gphoto2 --get-file 150
@@ -425,9 +441,9 @@ class GpCamera(BaseCamera):
 
         # LOGGER.debug(img)
 
-        img = TKimg()
-        img.folder ="/store_00020001/DCIM/100CANON/"
-        img.name = cur_file
+        # img = TKimg()
+        # img.folder ="/store_00020001/DCIM/100CANON/"
+        # img.name = cur_file
 
 
         # effect = str(effect).lower()
@@ -435,7 +451,7 @@ class GpCamera(BaseCamera):
         #     raise ValueError("Invalid capture effect '{}' (choose among {})".format(effect, self.IMAGE_EFFECTS))
         #
 
-        self._captures.append((img, effect))
+        # self._captures.append((img, effect))
 
         # self._captures.append((self._cam.capture(gp.GP_CAPTURE_IMAGE), effect))
         # time.sleep(0.3)  # Necessary to let the time for the camera to save the image
@@ -462,6 +478,31 @@ class GpCamera(BaseCamera):
     #         self._captures.append((img.read(), effect))
     #
     #     sp.run(f"rm {cur_file}", shell=True, capture_output=False)
+
+    def collect_captures(self):
+        # collect filenames from cam
+
+        LOGGER.debug("in collect captures")
+        
+        counter = 3
+
+        _, files_o = gp.gp_camera_folder_list_files(self._cam, "/store_00020001/DCIM/100CANON/")
+        files = files_o.keys()
+
+        for x in files:
+            LOGGER.debug(x)
+
+        while counter > 0:
+            cur_file = files[-1]  # we fetch the name of the last file on the cam
+
+            LOGGER.debug(cur_file)
+
+            img = TKimg()
+            img.folder = "/store_00020001/DCIM/100CANON/"
+            img.name = cur_file
+
+            self._captures.append((img, None))
+            counter -= 1
 
     def quit(self):
         """Close the camera driver, it's definitive.
