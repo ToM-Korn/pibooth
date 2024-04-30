@@ -256,7 +256,7 @@ class GpCamera(BaseCamera):
             raise ValueError("Start time shall be greater than 0")
 
         # this action is performed on canon dslr to focus during the countdown
-        # self.set_config_value('actions', 'autofocusdrive', '1')
+        self.set_config_value('actions', 'autofocusdrive', '1')
 
 
         # self.set_config_value('capturesettings', 'focusmode', '1') # set focusmode to AI Focus / AIServo = 2
@@ -303,7 +303,7 @@ class GpCamera(BaseCamera):
             if updated_rect:
                 pygame.display.update(updated_rect)
 
-        # self.set_config_value('actions', 'cancelautofocus', '1')
+        self.set_config_value('actions', 'cancelautofocus', '1')
 
         self._show_overlay(get_translated_text('smile'), alpha)
         self._window.show_image(self._get_preview_image())
@@ -350,6 +350,7 @@ class GpCamera(BaseCamera):
         # Fullpress Camera Button by Hardware
         # self.com.write(b'CAMSHO\n')
         # LOGGER.info("Take Picture")
+        self.set_config_value('actions', 'eosremoterelease', 5)
 
         # one option here for a better timing would be to
         # use /main/actions/eosremoterelease
