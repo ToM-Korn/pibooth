@@ -29,7 +29,7 @@ def find_camera():
     cv_cam_proxy = get_cv_camera_proxy()
 
     # dedicated gphoto2 camera for testing
-    # return GpCamera(gp_cam_proxy)
+    return GpCamera(gp_cam_proxy)
 
     if rpi_cam_proxy and gp_cam_proxy:
         LOGGER.info("Configuring hybrid camera (Picamera + gPhoto2) ...")

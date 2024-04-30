@@ -17,6 +17,12 @@ import subprocess as sp
 import serial
 
 
+
+class TKimg():
+    folder = None
+    name = None
+
+
 def get_gp_camera_proxy(port=None):
     """Return camera proxy if a gPhoto2 compatible camera is found
     else return None.
@@ -95,6 +101,8 @@ class GpCamera(BaseCamera):
             self.com = serial.Serial(port, timeout=1)
 
             LOGGER.info(f"Communication Port for Serial is: {port}")
+
+        self.img_counter = 1
 
 
     def _specific_initialization(self):
@@ -177,6 +185,9 @@ class GpCamera(BaseCamera):
         :param capture_data: couple (GPhotoPath, effect)
         :type capture_data: tuple
         """
+
+        # self.img_counter = 0
+
         gp_path, effect = capture_data
         camera_file = self._cam.file_get(gp_path.folder, gp_path.name, gp.GP_FILE_TYPE_NORMAL)
         if self.delete_internal_memory:
@@ -348,10 +359,12 @@ class GpCamera(BaseCamera):
         # self.set_config_value('actions', 'eosremoterelease', 2)
         # self.set_config_value('actions', 'eosremoterelease', 8)
 
+        # TK Hardware solution of focus and trigger -> instant picture taken
+
         self.com.write(b'CAMFOC\n')
         time.sleep(0.25)
         self.com.write(b'CAMSHO\n')
-        time.sleep(1)
+        time.sleep(0.5)
 
 
         # canon image folder
@@ -363,43 +376,93 @@ class GpCamera(BaseCamera):
         #  #149   IMG_7558.JPG               rd  3293 KB image/jpeg 1700979078
         #  #150   IMG_7559.JPG               rd  3021 KB image/jpeg 1700979088
 
-        files = gp.gp_camera_folder_list_files(self._cam, "/store_00020001/DCIM/100CANON")
+        _, files_o = gp.gp_camera_folder_list_files(self._cam, "/store_00020001/DCIM/100CANON/")
 
-        for x in files:
-            LOGGER.debug(x)
+        # files_o is Swig Object
+        # dir ->
+        # '__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__',
+        # '__getattribute__', '__getitem__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__',
+        # '__int__', '__iter__', '__le__', '__len__', '__lt__', '__ne__', '__new__', '__reduce__', '__reduce_ex__',
+        # '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__',
+        # 'acquire', 'append', 'count', 'disown', 'find_by_name', 'get_name', 'get_value', 'items',
+        # 'keys', 'next', 'own', 'populate', 'reset', 'set_name', 'set_value', 'sort', 'this', 'thisown', 'values']
+        # LOGGER.debug(dir(files_o))
 
-        LOGGER.debug(files)
+        # for k in files_o.keys():
+        #     # gives IMG_7239.JPG
+        #     LOGGER.debug(k)
+        #
+        # for i in files_o.items():
+        #     # gives ('IMG_7233.JPG', None)
+        #     LOGGER.debug(i)
+        #
+        # for v in files_o.values():
+        #     # gives None
+        #     LOGGER.debug(v)
 
-        cur_file = files[-1]
+        files = files_o.keys()
+
+        cur_file = files[-1] # we fetch the name of the last file on the cam
+
 
         LOGGER.debug(cur_file)
 
         # to download specific file number from list
         # gphoto2 --get-file 150
 
-        img = bytes()
-        gp.gp_camera_file_read(self._cam, "/store_00020001/DCIM/100CANON/", cur_file, gp.GP_FILE_TYPE_RAW, 0, img)
+        # img = memoryview(bytearray())
+        # gp.gp_camera_file_read(self._cam, "/store_00020001/DCIM/100CANON/", cur_file, gp.GP_FILE_TYPE_NORMAL, 0, img)
+        # gp.gp_camera_file_read(self._cam, "/store_00020001/DCIM/100CANON/", cur_file, gp.GP_FILE_TYPE_RAW, 0, img)
 
-        LOGGER.debug(img)
+        # LOGGER.debug(img)
 
-        # to delete file
-        # gphoto2 -d /store_00020001/DCIM/100CANON/IMG_7559.JPG
-        # or
-        # def gp_camera_file_delete(camera, folder, file, context): # real signature unknown; restored from __doc__
-
-        gp.gp_camera_file_delete(self._cam, "/store_00020001/DCIM/100CANON/", cur_file)
-
-        self._captures.append((img, effect))
+        img = TKimg()
+        img.folder ="/store_00020001/DCIM/100CANON/"
+        img.name = cur_file
 
 
-        #
         # effect = str(effect).lower()
         # if effect not in self.IMAGE_EFFECTS:
         #     raise ValueError("Invalid capture effect '{}' (choose among {})".format(effect, self.IMAGE_EFFECTS))
         #
-        # if self.capture_iso != self.preview_iso:
-        #     self.set_config_value('imgsettings', 'iso', self.capture_iso)
+
+        self._captures.append((img, effect))
+
+        # self._captures.append((self._cam.capture(gp.GP_CAPTURE_IMAGE), effect))
+        # time.sleep(0.3)  # Necessary to let the time for the camera to save the image
         #
+        # if self.capture_iso != self.preview_iso:
+        #     self.set_config_value('imgsettings', 'iso', self.preview_iso)
+
+        self._hide_overlay()  # If stop_preview() has not been called
+
+
+    # def get_images_command_line(self):
+    #     # when trying to read or delete the file from the cam
+    #     # ** *Error(-53: 'Could not claim the USB device') ** *
+    #     cur_file = None
+    #     effect = None
+    #     # to save file to local storage
+    #     sp.run(f"gphoto2 -p /store_00020001/DCIM/100CANON/{cur_file}", shell=True, capture_output=False)
+    #
+    #     # to delete file
+    #     sp.run(f"gphoto2 -d /store_00020001/DCIM/100CANON/{cur_file}", shell=True, capture_output=False)
+    #
+    #     with open(cur_file, 'rb') as img:
+    #         LOGGER.debug(img)
+    #         self._captures.append((img.read(), effect))
+    #
+    #     sp.run(f"rm {cur_file}", shell=True, capture_output=False)
+
+    def quit(self):
+        """Close the camera driver, it's definitive.
+        """
+        if self._cam:
+            del self._gp_logcb  # Uninstall log callback
+            self._cam.exit()
+
+
+
         # # Fullpress Camera Button by Hardware
         # # self.com.write(b'CAMSHO\n')
         # # LOGGER.info("Take Picture")
@@ -429,18 +492,3 @@ class GpCamera(BaseCamera):
         # # with gp.GP_CAPTURE_IMAGE the Camera first focuses and then shoots
         # # but this leads to delays in some places
         #
-        # self._captures.append((self._cam.capture(gp.GP_CAPTURE_IMAGE), effect))
-        # # self._captures.append((self._cam.file_get))
-        # time.sleep(0.3)  # Necessary to let the time for the camera to save the image
-        #
-        # if self.capture_iso != self.preview_iso:
-        #     self.set_config_value('imgsettings', 'iso', self.preview_iso)
-
-        self._hide_overlay()  # If stop_preview() has not been called
-
-    def quit(self):
-        """Close the camera driver, it's definitive.
-        """
-        if self._cam:
-            del self._gp_logcb  # Uninstall log callback
-            self._cam.exit()
