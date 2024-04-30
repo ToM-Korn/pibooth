@@ -244,6 +244,7 @@ class GpCamera(BaseCamera):
 
         if self._preview_compatible:
             if self._preview_viewfinder:
+                self.set_config_value('imgsettings', 'iso', 100)
                 self.set_config_value('actions', 'viewfinder', 1)
             self._window.show_image(self._get_preview_image())
 
@@ -340,6 +341,8 @@ class GpCamera(BaseCamera):
 
         if self._preview_viewfinder:
             self.set_config_value('actions', 'viewfinder', 0)
+
+        self.set_config_value('imgsettings', 'iso', 1600)
 
         # self.set_config_value('actions', 'eosremoterelease', 5)
         # self.set_config_value('actions', 'eosremoterelease', 2)
