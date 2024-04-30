@@ -338,10 +338,11 @@ class GpCamera(BaseCamera):
         """Capture a new picture.
         """
 
+        if self._preview_viewfinder:
+            self.set_config_value('actions', 'viewfinder', 0)
+
         self.set_config_value('actions', 'eosremoterelease', 5)
 
-        # if self._preview_viewfinder:
-        #     self.set_config_value('actions', 'viewfinder', 0)
         #
         # effect = str(effect).lower()
         # if effect not in self.IMAGE_EFFECTS:
