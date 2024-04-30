@@ -337,51 +337,54 @@ class GpCamera(BaseCamera):
     def capture(self, effect=None):
         """Capture a new picture.
         """
-        if self._preview_viewfinder:
-            self.set_config_value('actions', 'viewfinder', 0)
 
-        effect = str(effect).lower()
-        if effect not in self.IMAGE_EFFECTS:
-            raise ValueError("Invalid capture effect '{}' (choose among {})".format(effect, self.IMAGE_EFFECTS))
-
-        if self.capture_iso != self.preview_iso:
-            self.set_config_value('imgsettings', 'iso', self.capture_iso)
-
-        # Fullpress Camera Button by Hardware
-        # self.com.write(b'CAMSHO\n')
-        # LOGGER.info("Take Picture")
         self.set_config_value('actions', 'eosremoterelease', 5)
 
-        # one option here for a better timing would be to
-        # use /main/actions/eosremoterelease
-        # Label: Canon EOS Remote Release
-        # Readonly: 0
-        # Type: RADIO
-        # Current: None
-        # Choice: 0 None
-        # Choice: 1 Press Half
-        # Choice: 2 Press Full
-        # Choice: 3 Release Half
-        # Choice: 4 Release Full
-        # Choice: 5 Immediate
-        # Choice: 6 Press 1
-        # Choice: 7 Press 2
-        # Choice: 8 Press 3
-        # Choice: 9 Release 1
-        # Choice: 10 Release 2
-        # Choice: 11 Release 3
-        # END
-        # problem is, that when focus is not correct and we use for example 5
-        # the picture might be taken but unsharp
-        # with gp.GP_CAPTURE_IMAGE the Camera first focuses and then shoots
-        # but this leads to delays in some places
-
-        self._captures.append((self._cam.capture(gp.GP_CAPTURE_IMAGE), effect))
-        # self._captures.append((self._cam.file_get))
-        time.sleep(0.3)  # Necessary to let the time for the camera to save the image
-
-        if self.capture_iso != self.preview_iso:
-            self.set_config_value('imgsettings', 'iso', self.preview_iso)
+        # if self._preview_viewfinder:
+        #     self.set_config_value('actions', 'viewfinder', 0)
+        #
+        # effect = str(effect).lower()
+        # if effect not in self.IMAGE_EFFECTS:
+        #     raise ValueError("Invalid capture effect '{}' (choose among {})".format(effect, self.IMAGE_EFFECTS))
+        #
+        # if self.capture_iso != self.preview_iso:
+        #     self.set_config_value('imgsettings', 'iso', self.capture_iso)
+        #
+        # # Fullpress Camera Button by Hardware
+        # # self.com.write(b'CAMSHO\n')
+        # # LOGGER.info("Take Picture")
+        # self.set_config_value('actions', 'eosremoterelease', 5)
+        #
+        # # one option here for a better timing would be to
+        # # use /main/actions/eosremoterelease
+        # # Label: Canon EOS Remote Release
+        # # Readonly: 0
+        # # Type: RADIO
+        # # Current: None
+        # # Choice: 0 None
+        # # Choice: 1 Press Half
+        # # Choice: 2 Press Full
+        # # Choice: 3 Release Half
+        # # Choice: 4 Release Full
+        # # Choice: 5 Immediate
+        # # Choice: 6 Press 1
+        # # Choice: 7 Press 2
+        # # Choice: 8 Press 3
+        # # Choice: 9 Release 1
+        # # Choice: 10 Release 2
+        # # Choice: 11 Release 3
+        # # END
+        # # problem is, that when focus is not correct and we use for example 5
+        # # the picture might be taken but unsharp
+        # # with gp.GP_CAPTURE_IMAGE the Camera first focuses and then shoots
+        # # but this leads to delays in some places
+        #
+        # self._captures.append((self._cam.capture(gp.GP_CAPTURE_IMAGE), effect))
+        # # self._captures.append((self._cam.file_get))
+        # time.sleep(0.3)  # Necessary to let the time for the camera to save the image
+        #
+        # if self.capture_iso != self.preview_iso:
+        #     self.set_config_value('imgsettings', 'iso', self.preview_iso)
 
         self._hide_overlay()  # If stop_preview() has not been called
 
