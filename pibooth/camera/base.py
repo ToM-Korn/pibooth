@@ -19,7 +19,7 @@ class BaseCamera(object):
         self.resolution = None
         self.delete_internal_memory = False
         self.preview_rotation, self.capture_rotation = (0, 0)
-        self.preview_iso, self.capture_iso = (100, 100)
+        self.preview_iso, self.capture_iso = (100, 800)
         self.imageformat = 'Large Normal JPEG'
         self.preview_flip, self.capture_flip = (False, False)
 

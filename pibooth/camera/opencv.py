@@ -81,7 +81,7 @@ class CvCamera(BaseCamera):
             ct_rect = self.get_countdown_rect()
             ct_pil_image = self.build_countdown_top((ct_rect.width, ct_rect.height), str(text))
             LOGGER.debug("created countdown image to display")
-            ct_pil_image.save("countdown_img"+text+".png")
+            #ct_pil_image.save("countdown_img"+text+".png")
             updated = self._window.show_image(ct_pil_image, pos='top')
 
             pygame.event.pump()
