@@ -483,7 +483,7 @@ class GpCamera(BaseCamera):
         # collect filenames from cam
 
         LOGGER.debug("in collect captures")
-        
+
         counter = 3
 
         _, files_o = gp.gp_camera_folder_list_files(self._cam, "/store_00020001/DCIM/100CANON/")

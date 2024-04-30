@@ -61,6 +61,11 @@ class BaseCamera(object):
         if self._overlay is not None:
             self._overlay = None
 
+    def collect_captures(self):
+        # collect filenames from cam
+
+        raise NotImplementedError
+
     def _post_process_capture(self, capture_data):
         """Rework and return a PIL Image object from capture data.
         """
@@ -148,7 +153,7 @@ class BaseCamera(object):
     def get_captures(self):
         """Return all buffered captures as PIL images (buffer dropped after call).
         """
-        self._cam.collect_captures()
+        self.collect_captures()
 
         images = []
         for data in self._captures:
