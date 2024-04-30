@@ -493,7 +493,7 @@ class GpCamera(BaseCamera):
             LOGGER.debug(x)
 
         while counter > 0:
-            cur_file = files[-1]  # we fetch the name of the last file on the cam
+            cur_file = files[-counter]  # we fetch the name of the last file on the cam
 
             LOGGER.debug(cur_file)
 
