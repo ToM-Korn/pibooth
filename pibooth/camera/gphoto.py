@@ -364,7 +364,9 @@ class GpCamera(BaseCamera):
         self.com.write(b'CAMFOC\n')
         time.sleep(0.25)
         self.com.write(b'CAMSHO\n')
-        time.sleep(0.5)
+        # if we go on too fast we get a
+        # [-110] I/O in progress
+        time.sleep(1)
 
 
         # canon image folder
