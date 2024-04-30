@@ -106,8 +106,6 @@ class GpCamera(BaseCamera):
 
             LOGGER.info(f"Communication Port for Serial is: {port}")
 
-        self.img_counter = 1
-
 
     def _specific_initialization(self):
         """Camera initialization.
@@ -486,7 +484,9 @@ class GpCamera(BaseCamera):
 
         counter = 3
 
-        time.sleep(3)
+        # time.sleep(3)
+        gp.gp_camera_exit(self._cam)
+        gp.gp_camera_init(self._cam)
 
         _, files_o = gp.gp_camera_folder_list_files(self._cam, "/store_00020001/DCIM/100CANON/")
         files = files_o.keys()
