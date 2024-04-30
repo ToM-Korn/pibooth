@@ -13,8 +13,8 @@ from pibooth.utils import LOGGER, PoolingTimer, pkill
 from pibooth.language import get_translated_text
 from pibooth.camera.base import BaseCamera
 
-# import subprocess as sp
-# import serial
+import subprocess as sp
+import serial
 
 
 def get_gp_camera_proxy(port=None):
@@ -87,14 +87,14 @@ class GpCamera(BaseCamera):
         self._preview_compatible = True
         self._preview_viewfinder = False
 
-        # req = sp.run("ls /dev | grep USB", shell=True, capture_output=True)
-        #
-        # if req.returncode == 0:
-        #     port = req.stdout.decode().strip()
-        #     port = "/dev/" + port
-        #     self.com = serial.Serial(port, timeout=1)
-        #
-        #     LOGGER.info(f"Communication Port for Serial is: {port}")
+        req = sp.run("ls /dev | grep USB", shell=True, capture_output=True)
+
+        if req.returncode == 0:
+            port = req.stdout.decode().strip()
+            port = "/dev/" + port
+            self.com = serial.Serial(port, timeout=1)
+
+            LOGGER.info(f"Communication Port for Serial is: {port}")
 
 
     def _specific_initialization(self):
@@ -341,10 +341,14 @@ class GpCamera(BaseCamera):
         if self._preview_viewfinder:
             self.set_config_value('actions', 'viewfinder', 0)
 
+        time.sleep(1)
+
         # self.set_config_value('actions', 'eosremoterelease', 5)
         self.set_config_value('actions', 'eosremoterelease', 2)
         # self.set_config_value('actions', 'eosremoterelease', 8)
 
+        time.sleep(1)
+        self.com.write(b'CAMSHO\n')
         #
         # effect = str(effect).lower()
         # if effect not in self.IMAGE_EFFECTS:
