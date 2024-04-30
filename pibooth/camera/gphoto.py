@@ -363,7 +363,10 @@ class GpCamera(BaseCamera):
         #  #149   IMG_7558.JPG               rd  3293 KB image/jpeg 1700979078
         #  #150   IMG_7559.JPG               rd  3021 KB image/jpeg 1700979088
 
-        files = gp.gp_camera_folder_list_files(self._cam, "/store_00020001/DCIM/100CANON/")
+        files = gp.gp_camera_folder_list_files(self._cam, "/store_00020001/DCIM/100CANON")
+
+        for x in files:
+            LOGGER.debug(x)
 
         LOGGER.debug(files)
 
