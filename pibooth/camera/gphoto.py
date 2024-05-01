@@ -365,7 +365,7 @@ class GpCamera(BaseCamera):
         # TK Hardware solution of focus and trigger -> instant picture taken
 
         self.com.write(b'CAMFOC\n')
-        time.sleep(0.25)
+        time.sleep(0.5)
         self.com.write(b'CAMSHO\n')
         # if we go on too fast we get a
         # [-110] I/O in progress
