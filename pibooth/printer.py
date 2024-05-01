@@ -109,7 +109,17 @@ class Printer(object):
                 factory.save(fp.name)
                 self._conn.printFile(self.name, fp.name, osp.basename(filename), self.options)
         else:
-            self._conn.printFile(self.name, filename, osp.basename(filename), self.options)
+            # stripe feature
+            with tempfile.NamedTemporaryFile(suffix=osp.basename(filename)) as fp:
+                picture = Image.open(filename)
+                factory = get_picture_factory((picture, 'portrait') * copies)
+                # Don't call setup factory hook here, as the selected parameters
+                # are the one necessary to render several pictures on same page.
+                factory.set_margin(0)
+                factory.save(fp.name)
+                self._conn.printFile(self.name, fp.name, osp.basename(filename), self.options)
+
+            # self._conn.printFile(self.name, filename, osp.basename(filename), self.options)
         LOGGER.debug("File '%s' sent to the printer with options %s", filename, self.options)
 
     def cancel_all_tasks(self):
