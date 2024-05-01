@@ -536,20 +536,7 @@ class PictureFactory(object):
                 self._build_outlines(self._final)
 
         return self._final
-draw logo", self.name)
-            # image = self._build_logo(image)
 
-            LOGGER.info("Use %s to assemble final image", self.name)
-            self._final = self._build_final_image(image)
-
-            LOGGER.info("Use %s to draw texts", self.name)
-            self._build_texts(self._final)
-
-            if self._outlines:
-                LOGGER.info("Use %s to outline boundary borders", self.name)
-                self._build_outlines(self._final)
-
-        return self._final
 
     def build(self, rebuild=False):
         """Build the final image or doas nothing if the final image
