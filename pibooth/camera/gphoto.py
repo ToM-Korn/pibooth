@@ -364,12 +364,12 @@ class GpCamera(BaseCamera):
 
         # TK Hardware solution of focus and trigger -> instant picture taken
 
-        # self.com.write(b'CAMFOC\n')
-        # time.sleep(0.25)
-        # self.com.write(b'CAMSHO\n')
-        # # if we go on too fast we get a
-        # # [-110] I/O in progress
-        # time.sleep(1)
+        self.com.write(b'CAMFOC\n')
+        time.sleep(0.25)
+        self.com.write(b'CAMSHO\n')
+        # if we go on too fast we get a
+        # [-110] I/O in progress
+        time.sleep(1)
 
         # # collect captures
         # _, files_o = gp.gp_camera_folder_list_files(self._cam, "/store_00020001/DCIM/100CANON/")
