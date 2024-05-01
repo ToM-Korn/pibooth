@@ -171,6 +171,19 @@ def get_best_orientation(captures):
         raise ValueError("List of max 4 pictures expected, got {}".format(len(captures)))
     return orientation
 
+def get_stripe_factory(captures, paper_format=(4, 6), dpi=600):
+
+    orientation = PORTRAIT
+
+    # Ensure paper format is given in portrait (don't manage orientation with it)
+    if paper_format[0] > paper_format[1]:
+        paper_format = (paper_format[1], paper_format[0])
+
+    size = (paper_format[0] * dpi, paper_format[1] * dpi)
+
+    # For generating image for printing this one is taken
+    return factory.OpenCvPictureFactory(size[0], size[1], *captures)
+
 
 def get_picture_factory(captures, orientation=AUTO, paper_format=(4, 6), force_pil=False, dpi=600):
     """Return the picture factory use to concatenate the captures.

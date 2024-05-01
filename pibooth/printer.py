@@ -15,7 +15,7 @@ import os.path as osp
 import pygame
 from PIL import Image
 from pibooth.utils import LOGGER
-from pibooth.pictures import get_picture_factory
+from pibooth.pictures import get_picture_factory, get_stripe_factory
 
 
 PRINTER_TASKS_UPDATED = pygame.USEREVENT + 2
@@ -112,11 +112,11 @@ class Printer(object):
             # stripe feature
             with tempfile.NamedTemporaryFile(suffix=osp.basename(filename)) as fp:
                 picture = Image.open(filename)
-                factory = get_picture_factory((picture,) * 2,  'landscape')
+                factory = get_stripe_factory((picture,) * 2)
                 # Don't call setup factory hook here, as the selected parameters
                 # are the one necessary to render several pictures on same page.
                 factory.set_margin(0)
-                factory.save(fp.name)
+                factory.save_stripe(fp.name)
                 self._conn.printFile(self.name, fp.name, osp.basename(filename), self.options)
 
             # self._conn.printFile(self.name, filename, osp.basename(filename), self.options)

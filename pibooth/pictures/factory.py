@@ -71,6 +71,28 @@ class PictureFactory(object):
         """
         raise NotImplementedError
 
+
+    def _iter_stripe_rects(self):
+        """Yield top-left coordinates and max size rectangle for each source image.
+
+        :return: (image_x, image_y, image_width, image_height)
+        :rtype: tuple
+        """
+        image_x = 0
+        image_y = 0
+        total_width = self.width
+        total_height = self.height
+
+        image_width = total_width // 2
+        image_height = total_height
+
+        yield image_x, image_y, image_width, image_height
+
+        image_y += image_width
+
+        yield image_x, image_y, image_width, image_height
+
+
     def _iter_images_rects(self):
         """Yield top-left coordinates and max size rectangle for each source image.
 
@@ -80,6 +102,8 @@ class PictureFactory(object):
         image_x = self._margin
         image_y = self._margin
         total_width = self.width - 2 * self._margin
+
+        # 2024 04  killed ... logo can be added with background....
         # we start here with adding a logo
         # the logo should take half of the text space
         # depinding on the orientation ...
@@ -227,6 +251,28 @@ class PictureFactory(object):
         :rtype: object
         """
         raise NotImplementedError
+
+    def _build_stripe_matrix(self, image):
+        offset_generator = self._iter_stripe_rects()
+        count = 1
+        for src_image in self._iter_images():
+            pos_x, pos_y, max_w, max_h = next(offset_generator)
+            src_image, width, height = self._image_resize_keep_ratio(src_image, max_w, max_h, self._crop)
+            # Adjust position to have identical margin between borders and images
+            # if len(self._images) < 4:
+            #     pos_x, pos_y = pos_x + (max_w - width) // 2, pos_y + (max_h - height) // 2
+            # elif count == 1:
+            #     pos_x, pos_y = pos_x + (max_w - width) * 2 // 3, pos_y + (max_h - height) * 2 // 3
+            # elif count == 2:
+            #     pos_x, pos_y = pos_x + (max_w - width) // 3, pos_y + (max_h - height) * 2 // 3
+            # elif count == 3:
+            #     pos_x, pos_y = pos_x + (max_w - width) * 2 // 3, pos_y + (max_h - height) // 3
+            # else:
+            #     pos_x, pos_y = pos_x + (max_w - width) // 3, pos_y + (max_h - height) // 3
+
+            self._image_paste(src_image, image, pos_x, pos_y)
+            count += 1
+        return image
 
     def _build_matrix(self, image):
         """Draw the images matrix on the given image.
@@ -438,6 +484,26 @@ class PictureFactory(object):
         self._outlines = outlines
         self._final = None  # Force rebuild
 
+
+    def build_stripe(self, rebuild=False):
+        """Build the final image or doas nothing if the final image
+        has already been built previously.
+
+        :param rebuild: force re-build image
+        :type rebuild: bool
+
+        :return: PIL.Image instance
+        :rtype: object
+        """
+        if not self._final or rebuild:
+
+            LOGGER.info("Use %s to create background", self.name)
+            image = self._build_background()
+
+            LOGGER.info("Use %s to concatenate images", self.name)
+            image = self._build_matrix(image)
+
+            # LOGGER.info("Use %s to
     def build(self, rebuild=False):
         """Build the final image or doas nothing if the final image
         has already been built previously.
@@ -470,6 +536,62 @@ class PictureFactory(object):
                 self._build_outlines(self._final)
 
         return self._final
+draw logo", self.name)
+            # image = self._build_logo(image)
+
+            LOGGER.info("Use %s to assemble final image", self.name)
+            self._final = self._build_final_image(image)
+
+            LOGGER.info("Use %s to draw texts", self.name)
+            self._build_texts(self._final)
+
+            if self._outlines:
+                LOGGER.info("Use %s to outline boundary borders", self.name)
+                self._build_outlines(self._final)
+
+        return self._final
+
+    def build(self, rebuild=False):
+        """Build the final image or doas nothing if the final image
+        has already been built previously.
+
+        :param rebuild: force re-build image
+        :type rebuild: bool
+
+        :return: PIL.Image instance
+        :rtype: object
+        """
+        if not self._final or rebuild:
+
+            LOGGER.info("Use %s to create background", self.name)
+            image = self._build_background()
+
+            LOGGER.info("Use %s to concatenate images", self.name)
+            image = self._build_matrix(image)
+
+            # LOGGER.info("Use %s to draw logo", self.name)
+            # image = self._build_logo(image)
+
+            LOGGER.info("Use %s to assemble final image", self.name)
+            self._final = self._build_final_image(image)
+
+            LOGGER.info("Use %s to draw texts", self.name)
+            self._build_texts(self._final)
+
+            if self._outlines:
+                LOGGER.info("Use %s to outline boundary borders", self.name)
+                self._build_outlines(self._final)
+
+        return self._final
+
+    def save_stripe(self, path):
+        dirname = osp.dirname(osp.abspath(path))
+        if not osp.isdir(dirname):
+            os.mkdir(dirname)
+        image = self.build_stripe()
+        LOGGER.info("Save image '%s'", path)
+        image.save(path)
+        return image
 
     def save(self, path):
         """Build if not already done and save final image in a file.
