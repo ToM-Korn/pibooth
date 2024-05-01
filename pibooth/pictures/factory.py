@@ -88,7 +88,7 @@ class PictureFactory(object):
 
         yield image_x, image_y, image_width, image_height
 
-        image_y += image_width
+        image_x += image_width
 
         yield image_x, image_y, image_width, image_height
 
