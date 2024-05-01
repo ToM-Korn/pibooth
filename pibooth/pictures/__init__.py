@@ -171,7 +171,7 @@ def get_best_orientation(captures):
         raise ValueError("List of max 4 pictures expected, got {}".format(len(captures)))
     return orientation
 
-def get_stripe_factory(captures, paper_format=(4, 6), dpi=600):
+def get_stripe_factory(captures, paper_format=(4, 6),force_pil=False, dpi=600):
 
     orientation = LANDSCAPE
 
@@ -180,6 +180,9 @@ def get_stripe_factory(captures, paper_format=(4, 6), dpi=600):
         paper_format = (paper_format[1], paper_format[0])
 
     size = (paper_format[0] * dpi, paper_format[1] * dpi)
+
+    if not factory.cv2 or force_pil:
+        return factory.PilPictureFactory(size[0], size[1], *captures)
 
     # For generating image for printing this one is taken
     return factory.OpenCvPictureFactory(size[0], size[1], *captures)
