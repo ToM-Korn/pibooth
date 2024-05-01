@@ -173,7 +173,7 @@ def get_best_orientation(captures):
 
 def get_stripe_factory(captures, paper_format=(4, 6),force_pil=False, dpi=600):
 
-    orientation = LANDSCAPE
+    orientation = PORTRAIT
 
     # Ensure paper format is given in portrait (don't manage orientation with it)
     if paper_format[0] > paper_format[1]:
@@ -182,7 +182,7 @@ def get_stripe_factory(captures, paper_format=(4, 6),force_pil=False, dpi=600):
     size = (paper_format[0] * dpi, paper_format[1] * dpi)
 
     if not factory.cv2 or force_pil:
-        return factory.PilPictureFactory(size[1], size[0], *captures)
+        return factory.PilPictureFactory(size[0], size[1], *captures)
 
     # For generating image for printing this one is taken
     return factory.OpenCvPictureFactory(size[0], size[1], *captures)
