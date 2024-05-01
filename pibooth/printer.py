@@ -116,7 +116,7 @@ class Printer(object):
                 # Don't call setup factory hook here, as the selected parameters
                 # are the one necessary to render several pictures on same page.
                 factory.set_margin(0)
-                factory.save_stripe(fp.name)
+                factory.save(fp.name)
                 self._conn.printFile(self.name, fp.name, osp.basename(filename), self.options)
 
             # self._conn.printFile(self.name, filename, osp.basename(filename), self.options)

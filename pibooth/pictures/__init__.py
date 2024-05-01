@@ -173,7 +173,7 @@ def get_best_orientation(captures):
 
 def get_stripe_factory(captures, paper_format=(4, 6), dpi=600):
 
-    orientation = PORTRAIT
+    orientation = LANDSCAPE
 
     # Ensure paper format is given in portrait (don't manage orientation with it)
     if paper_format[0] > paper_format[1]:
