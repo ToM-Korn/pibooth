@@ -501,30 +501,11 @@ class PictureFactory(object):
             image = self._build_background()
 
             LOGGER.info("Use %s to concatenate images", self.name)
-            image = self._build_matrix(image)
+            image = self._build_stripe_matrix(image)
 
-            # LOGGER.info("Use %s to
-    def build(self, rebuild=False):
-        """Build the final image or doas nothing if the final image
-        has already been built previously.
-
-        :param rebuild: force re-build image
-        :type rebuild: bool
-
-        :return: PIL.Image instance
-        :rtype: object
-        """
-        if not self._final or rebuild:
-
-            LOGGER.info("Use %s to create background", self.name)
-            image = self._build_background()
-
-            LOGGER.info("Use %s to concatenate images", self.name)
-            image = self._build_matrix(image)
-
-            # LOGGER.info("Use %s to draw logo", self.name)
-            # image = self._build_logo(image)
-
+            # LOGGER.info("Use %s todraw logo", self.name)
+            #             # image = self._build_logo(image)
+            #
             LOGGER.info("Use %s to assemble final image", self.name)
             self._final = self._build_final_image(image)
 
