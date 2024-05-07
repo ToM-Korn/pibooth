@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import logging
 
 import pygame
 from PIL import Image, ImageDraw
@@ -23,8 +24,9 @@ class BaseCamera(object):
         self.preview_iso, self.capture_iso = (100, 800)
         self.imageformat = 'Large Normal JPEG'
         self.preview_flip, self.capture_flip = (False, False)
+        self.debug = False
 
-    def initialize(self, iso, resolution, rotation=0, flip=False, delete_internal_memory=False, imageformat=None):
+    def initialize(self, iso, resolution, rotation=0, flip=False, delete_internal_memory=False, imageformat=None, debug=False):
         """Initialize the camera.
         """
         if not isinstance(rotation, (tuple, list)):
@@ -44,6 +46,8 @@ class BaseCamera(object):
             self.imageformat = imageformat
         self.delete_internal_memory = delete_internal_memory
         self._specific_initialization()
+        LOGGER.debug(f"Initialisation with Debug = {debug}")
+        self.debug = debug
 
     def _specific_initialization(self):
         """Specific camera initialization.

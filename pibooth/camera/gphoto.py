@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import io
+import logging
 import time
 import pygame
 try:
@@ -97,14 +98,17 @@ class GpCamera(BaseCamera):
         self._preview_compatible = True
         self._preview_viewfinder = False
 
-        req = sp.run("ls /dev | grep USB", shell=True, capture_output=True)
+        if not self.debug:
+            # hardware communication is only possible in live mode
+            # in debug mode we deactivate it
+            req = sp.run("ls /dev | grep USB", shell=True, capture_output=True)
 
-        if req.returncode == 0:
-            port = req.stdout.decode().strip()
-            port = "/dev/" + port
-            self.com = serial.Serial(port, timeout=1)
+            if req.returncode == 0:
+                port = req.stdout.decode().strip()
+                port = "/dev/" + port
+                self.com = serial.Serial(port, timeout=1)
 
-            LOGGER.info(f"Communication Port for Serial is: {port}")
+                LOGGER.info(f"Communication Port for Serial is: {port}")
 
 
     def _specific_initialization(self):
@@ -356,7 +360,10 @@ class GpCamera(BaseCamera):
         if self._preview_viewfinder:
             self.set_config_value('actions', 'viewfinder', 0)
 
-        self.set_config_value('imgsettings', 'iso', 1600)
+
+        if self.capture_iso != self.preview_iso:
+            logging.DEBUG(f'set iso to capture ISO: {self.capture_iso}')
+            self.set_config_value('imgsettings', 'iso', self.capture_iso)
 
         # self.set_config_value('actions', 'eosremoterelease', 5)
         # self.set_config_value('actions', 'eosremoterelease', 2)
@@ -364,11 +371,17 @@ class GpCamera(BaseCamera):
 
         # TK Hardware solution of focus and trigger -> instant picture taken
 
-        self.com.write(b'CAMFOC\n')
-        time.sleep(0.5)
-        self.com.write(b'CAMSHO\n')
-        # if we go on too fast we get a
-        # [-110] I/O in progress
+        LOGGER.debug(f"Debugmode {self.debug}")
+        if not self.debug:
+            # hardware communication is only possible in live mode
+            # in debug mode we deactivate it
+
+            self.com.write(b'CAMFOC\n')
+            time.sleep(0.5)
+            self.com.write(b'CAMSHO\n')
+            # if we go on too fast we get a
+            # [-110] I/O in progress
+
         time.sleep(1)
 
         # # collect captures
@@ -451,11 +464,19 @@ class GpCamera(BaseCamera):
 
         # self._captures.append((img, effect))
 
+        if self.debug:
+            # hardware communication is only possible in live mode
+            # in debug mode we deactivate it
+            self._cam.capture(gp.GP_CAPTURE_IMAGE)
+
         # self._captures.append((self._cam.capture(gp.GP_CAPTURE_IMAGE), effect))
         # time.sleep(0.3)  # Necessary to let the time for the camera to save the image
         #
-        # if self.capture_iso != self.preview_iso:
-        #     self.set_config_value('imgsettings', 'iso', self.preview_iso)
+
+
+        if self.capture_iso != self.preview_iso:
+            logging.DEBUG(f'set iso to capture ISO: {self.preview_iso}')
+            self.set_config_value('imgsettings', 'iso', self.preview_iso)
 
         self._hide_overlay()  # If stop_preview() has not been called
 
